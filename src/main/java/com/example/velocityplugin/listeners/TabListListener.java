@@ -48,11 +48,6 @@ public class TabListListener {
 
     private void updateTabListForPlayer(Player viewer) {
         for (Player target : server.getAllPlayers()) {
-            // 如果目标玩家就是查看者，可以跳过
-            if (target.equals(viewer)) {
-                continue;
-            }
-            
             Component displayName = getDisplayName(target);
             viewer.getTabList().removeEntry(target.getUniqueId());
             viewer.getTabList().addEntry(
@@ -69,11 +64,6 @@ public class TabListListener {
         Component displayName = getDisplayName(target);
         
         for (Player viewer : server.getAllPlayers()) {
-            // 跳过目标玩家自己
-            if (target.equals(viewer)) {
-                continue;
-            }
-            
             viewer.getTabList().removeEntry(target.getUniqueId());
             TabListEntry entry = TabListEntry.builder()
                 .profile(target.getGameProfile())
@@ -89,7 +79,7 @@ public class TabListListener {
         if (config.hasPrefix(playerName)) {
             String prefix = config.getPrefix(playerName);
             return LegacyComponentSerializer.legacyAmpersand()
-                .deserialize(prefix + playerName);
+                .deserialize(prefix + " " + playerName);
         }
         return Component.text(playerName);
     }
