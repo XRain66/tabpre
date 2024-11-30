@@ -101,4 +101,12 @@ fun isNonStable(version: String): Boolean {
     val regex = "^[0-9,.v-]+(-r)?$".toRegex()
     val isStable = stableKeyword || regex.matches(version)
     return !isStable
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs("src/main/java")
+        }
+    }
 } 

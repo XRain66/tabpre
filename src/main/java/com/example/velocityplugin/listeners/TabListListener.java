@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public class TabListListener {
@@ -20,42 +21,59 @@ public class TabListListener {
 
     @Subscribe
     public void onPlayerJoin(PostLoginEvent event) {
-        updatePlayerPrefix(event.getPlayer());
-        // 更新所有玩家的Tab列表
-        updateAllPlayers();
+        Player joiningPlayer = event.getPlayer();
+        // 为新加入的玩家更新所有玩家的显示名称
+        updateTabListForPlayer(joiningPlayer);
+        // 为所有在线玩家更新新玩家的显示名称
+        updatePlayerForAll(joiningPlayer);
     }
 
     @Subscribe
     public void onServerConnected(ServerConnectedEvent event) {
         // 当玩家切换服务器时更新
-        updatePlayerPrefix(event.getPlayer());
+        Player player = event.getPlayer();
+        updateTabListForPlayer(player);
+        updatePlayerForAll(player);
     }
 
     @Subscribe
     public void onPlayerDisconnect(DisconnectEvent event) {
-        // 玩家断开连接时更新其他玩家的Tab列表
-        server.getAllPlayers().forEach(this::updatePlayerPrefix);
+        // 玩家断开连接时，为其他玩家更新Tab列表
+        server.getAllPlayers().forEach(this::updateTabListForPlayer);
     }
 
-    private void updatePlayerPrefix(Player player) {
-        String playerName = player.getUsername();
-        if (config.hasPrefix(playerName)) {
-            String prefix = config.getPrefix(playerName);
-            player.setPlayerListName(LegacyComponentSerializer.legacyAmpersand()
-                .deserialize(prefix + playerName));
-        } else {
-            // 如果没有前缀配置，恢复默认名称
-            player.setPlayerListName(LegacyComponentSerializer.legacyAmpersand()
-                .deserialize(playerName));
+    private void updateTabListForPlayer(Player viewer) {
+        // 更新指定玩家的Tab列表中所有玩家的显示名称
+        for (Player target : server.getAllPlayers()) {
+            Component displayName = getDisplayName(target);
+            viewer.getTabList().addEntry(target.getTabList().getEntry(target.getUniqueId())
+                .setDisplayName(displayName));
         }
     }
 
-    private void updateAllPlayers() {
-        server.getAllPlayers().forEach(this::updatePlayerPrefix);
+    private void updatePlayerForAll(Player target) {
+        // 为所有在线玩家更新指定玩家的显示名称
+        Component displayName = getDisplayName(target);
+        for (Player viewer : server.getAllPlayers()) {
+            viewer.getTabList().addEntry(target.getTabList().getEntry(target.getUniqueId())
+                .setDisplayName(displayName));
+        }
     }
 
-    // 提供一个公共方法用于手动更新所有玩家（例如配置重载后）
+    private Component getDisplayName(Player player) {
+        String playerName = player.getUsername();
+        if (config.hasPrefix(playerName)) {
+            String prefix = config.getPrefix(playerName);
+            return LegacyComponentSerializer.legacyAmpersand()
+                .deserialize(prefix + playerName);
+        }
+        return Component.text(playerName);
+    }
+
+    // 提供一个公共方法用于手动更新所有玩家的Tab列表（例如配置重载后）
     public void refreshAllPlayers() {
-        updateAllPlayers();
+        for (Player player : server.getAllPlayers()) {
+            updateTabListForPlayer(player);
+        }
     }
 } 
