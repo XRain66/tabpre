@@ -23,10 +23,11 @@ java {
 sourceSets {
     main {
         java {
-            srcDirs(project.file("src/main/java").absolutePath)
+            srcDirs("src/main/java")
+            include("com/example/tabprefabric/**")
         }
         resources {
-            srcDirs(project.file("src/main/resources").absolutePath)
+            srcDirs("src/main/resources")
         }
     }
 }
@@ -37,6 +38,10 @@ loom {
             property("mixin.debug", "true")
             property("mixin.debug.export", "true")
         }
+    }
+    
+    mixin {
+        defaultRefmapName.set("tabpre.refmap.json")
     }
 }
 
