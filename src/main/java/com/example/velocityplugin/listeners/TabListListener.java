@@ -49,14 +49,18 @@ public class TabListListener {
     private void updateTabListForPlayer(Player viewer) {
         for (Player target : server.getAllPlayers()) {
             Component displayName = getDisplayName(target);
-            // 先移除旧条目
-            viewer.getTabList().removeEntry(target.getUniqueId());
-            // 再添加新条目
-            viewer.getTabList().addEntry(TabListEntry.builder()
+            // 使用 target 的 UUID 和 GameProfile，但更新 displayName
+            TabListEntry entry = TabListEntry.builder()
                 .profile(target.getGameProfile())
                 .displayName(displayName)
                 .tabList(viewer.getTabList())
-                .build());
+                .latency(target.getPing())  // 保持延迟显示
+                .gameMode(0)  // 保持默认游戏模式
+                .build();
+            
+            // 先移除旧条目，再添加新条目
+            viewer.getTabList().removeEntry(target.getUniqueId());
+            viewer.getTabList().addEntry(entry);
         }
     }
 
@@ -64,14 +68,17 @@ public class TabListListener {
         Component displayName = getDisplayName(target);
         
         for (Player viewer : server.getAllPlayers()) {
-            // 先移除旧条目
-            viewer.getTabList().removeEntry(target.getUniqueId());
-            // 再添加新条目
-            viewer.getTabList().addEntry(TabListEntry.builder()
+            TabListEntry entry = TabListEntry.builder()
                 .profile(target.getGameProfile())
                 .displayName(displayName)
                 .tabList(viewer.getTabList())
-                .build());
+                .latency(target.getPing())  // 保持延迟显示
+                .gameMode(0)  // 保持默认游戏模式
+                .build();
+            
+            // 先移除旧条目，再添加新条目
+            viewer.getTabList().removeEntry(target.getUniqueId());
+            viewer.getTabList().addEntry(entry);
         }
     }
 
