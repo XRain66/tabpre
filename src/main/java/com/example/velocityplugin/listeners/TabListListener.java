@@ -13,6 +13,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class TabListListener {
     private final TabPreConfig config;
@@ -26,14 +27,20 @@ public class TabListListener {
     @Subscribe
     public void onPlayerJoin(PostLoginEvent event) {
         Player joiningPlayer = event.getPlayer();
-        // 只需要调用一次 updateTabListForPlayer 就足够了
-        server.getAllPlayers().forEach(this::updateTabListForPlayer);
+        // 延迟一下更新，等待后端服务器的 TabList 先发送完
+        server.getScheduler()
+            .buildTask(this, () -> server.getAllPlayers().forEach(this::updateTabListForPlayer))
+            .delay(100, TimeUnit.MILLISECONDS)
+            .schedule();
     }
 
     @Subscribe
     public void onServerConnected(ServerConnectedEvent event) {
-        // 当玩家切换服务器时更新
-        server.getAllPlayers().forEach(this::updateTabListForPlayer);
+        // 延迟一下更新，等待后端服务器的 TabList 先发送完
+        server.getScheduler()
+            .buildTask(this, () -> server.getAllPlayers().forEach(this::updateTabListForPlayer))
+            .delay(100, TimeUnit.MILLISECONDS)
+            .schedule();
     }
 
     @Subscribe

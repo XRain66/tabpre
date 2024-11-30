@@ -117,17 +117,19 @@ fun isNonStable(version: String): Boolean {
 sourceSets {
     main {
         java {
-            srcDirs(setOf("src/main/java"))
-            java.srcDir("src/main/java")
+            srcDirs(projectDir.resolve("src/main/java").absolutePath)
         }
         resources {
-            srcDirs(setOf("src/main/resources"))
-            resources.srcDir("src/main/resources")
+            srcDirs(projectDir.resolve("src/main/resources").absolutePath)
         }
     }
 }
 
-// 添加编码设置
-tasks.withType<JavaCompile> {
+// 确保使用正确的编码
+tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+    // 明确指定源代码目录
+    sourceSets.main.get().java.srcDirs.forEach { srcDir ->
+        source(srcDir)
+    }
 } 
