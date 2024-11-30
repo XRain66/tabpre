@@ -23,11 +23,10 @@ java {
 sourceSets {
     main {
         java {
-            srcDirs("src/main/java")
-            include("com/example/tabprefabric/**")
+            srcDirs(layout.projectDirectory.dir("src/main/java"))
         }
         resources {
-            srcDirs("src/main/resources")
+            srcDirs(layout.projectDirectory.dir("src/main/resources"))
         }
     }
 }
@@ -43,6 +42,8 @@ loom {
     mixin {
         defaultRefmapName.set("tabpre.refmap.json")
     }
+    
+    sourceSet(sourceSets.main.get())
 }
 
 tasks {

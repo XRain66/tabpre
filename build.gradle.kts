@@ -1,7 +1,20 @@
+buildscript {
+    repositories {
+        maven {
+            name = "Fabric"
+            url = uri("https://maven.fabricmc.net/")
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("net.fabricmc:fabric-loom:0.8-SNAPSHOT")
+    }
+}
+
 plugins {
     id("java")
     id("checkstyle")
-    id("fabric-loom") version "0.8-SNAPSHOT" apply false
 }
 
 allprojects {
