@@ -1,0 +1,24 @@
+# 设置默认行为，以防人们没有设置core.autocrlf
+* text=auto
+
+# 明确声明应该规范化的文本文件
+*.java text
+*.xml text
+*.yml text
+*.yaml text
+*.json text
+*.properties text
+*.txt text
+*.md text
+*.gradle text
+*.kts text
+
+# 声明应该保持原样的文件
+*.jar binary
+*.png binary
+*.jpg binary
+*.gif binary
+
+# 声明应该使用LF的文件
+gradlew text eol=lf
+*.sh text eol=lf 
