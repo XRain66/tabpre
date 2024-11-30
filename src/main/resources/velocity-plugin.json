@@ -1,0 +1,8 @@
+{
+  "id": "example_plugin",
+  "name": "Example Plugin",
+  "version": "1.0.0",
+  "description": "一个示例 Velocity 插件",
+  "authors": ["YourName"],
+  "main": "com.example.velocityplugin.ExamplePlugin"
+} 
