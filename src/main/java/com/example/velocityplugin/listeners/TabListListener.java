@@ -49,14 +49,10 @@ public class TabListListener {
     private void updateTabListForPlayer(Player viewer) {
         for (Player target : server.getAllPlayers()) {
             Component displayName = getDisplayName(target);
-            viewer.getTabList().removeEntry(target.getUniqueId());
-            viewer.getTabList().addEntry(
-                TabListEntry.builder()
-                    .profile(target.getGameProfile())
-                    .displayName(displayName)
-                    .tabList(viewer.getTabList())
-                    .build()
-            );
+            // 使用 viewer 的 TabList 来获取和更新条目
+            viewer.getTabList().getEntry(target.getUniqueId()).ifPresent(entry -> {
+                viewer.getTabList().addEntry(entry.setDisplayName(displayName));
+            });
         }
     }
 
@@ -64,13 +60,10 @@ public class TabListListener {
         Component displayName = getDisplayName(target);
         
         for (Player viewer : server.getAllPlayers()) {
-            viewer.getTabList().removeEntry(target.getUniqueId());
-            TabListEntry entry = TabListEntry.builder()
-                .profile(target.getGameProfile())
-                .displayName(displayName)
-                .tabList(viewer.getTabList())
-                .build();
-            viewer.getTabList().addEntry(entry);
+            // 使用 viewer 的 TabList 来获取和更新条目
+            viewer.getTabList().getEntry(target.getUniqueId()).ifPresent(entry -> {
+                viewer.getTabList().addEntry(entry.setDisplayName(displayName));
+            });
         }
     }
 
