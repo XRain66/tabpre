@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("checkstyle")
 }
 
 group = "com.example"
@@ -32,6 +33,12 @@ tasks {
     shadowJar {
         archiveBaseName.set(project.name)
         archiveClassifier.set("")
+    }
+    
+    checkstyle {
+        toolVersion = "10.12.4"
+        configFile = file("config/checkstyle/checkstyle.xml")
+        isIgnoreFailures = true
     }
 }
 
