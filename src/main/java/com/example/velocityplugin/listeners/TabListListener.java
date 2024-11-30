@@ -26,30 +26,38 @@ public class TabListListener {
 
     @Subscribe
     public void onPlayerJoin(PostLoginEvent event) {
-        Player joiningPlayer = event.getPlayer();
-        // 延迟一下更新，等待后端服务器的 TabList 先发送完
+        // 延迟 500ms 后更新所有玩家的 TabList
         server.getScheduler()
-            .buildTask(this, () -> server.getAllPlayers().forEach(this::updateTabListForPlayer))
-            .delay(100, TimeUnit.MILLISECONDS)
-            .schedule();
-    }
-
-    @Subscribe
-    public void onServerConnected(ServerConnectedEvent event) {
-        // 延迟一下更新，等待后端服务器的 TabList 先发送完
-        server.getScheduler()
-            .buildTask(this, () -> server.getAllPlayers().forEach(this::updateTabListForPlayer))
-            .delay(100, TimeUnit.MILLISECONDS)
+            .buildTask(this, () -> {
+                // 为所有在线玩家更新 TabList
+                server.getAllPlayers().forEach(this::updateTabListForPlayer);
+            })
+            .delay(500, TimeUnit.MILLISECONDS)
             .schedule();
     }
 
     @Subscribe
     public void onPlayerDisconnect(DisconnectEvent event) {
-        Player disconnectedPlayer = event.getPlayer();
-        // 只更新其他在线玩家的 Tab 列表
-        server.getAllPlayers().stream()
-            .filter(p -> !p.equals(disconnectedPlayer))
-            .forEach(this::updateTabListForPlayer);
+        // 延迟 500ms 后更新所有玩家的 TabList
+        server.getScheduler()
+            .buildTask(this, () -> {
+                // 为所有在线玩家更新 TabList
+                server.getAllPlayers().forEach(this::updateTabListForPlayer);
+            })
+            .delay(500, TimeUnit.MILLISECONDS)
+            .schedule();
+    }
+
+    @Subscribe
+    public void onServerConnected(ServerConnectedEvent event) {
+        // 延迟 500ms 后更新所有玩家的 TabList
+        server.getScheduler()
+            .buildTask(this, () -> {
+                // 为所有在线玩家更新 TabList
+                server.getAllPlayers().forEach(this::updateTabListForPlayer);
+            })
+            .delay(500, TimeUnit.MILLISECONDS)
+            .schedule();
     }
 
     private void updateTabListForPlayer(Player viewer) {
@@ -61,12 +69,17 @@ public class TabListListener {
         // 重新添加所有玩家
         for (Player target : server.getAllPlayers()) {
             Component displayName = getDisplayName(target);
+            
+            // 获取玩家当前的游戏模式
+            int gameMode = target.getGameMode() != null ? 
+                target.getGameMode().ordinal() : 0;  // 如果无法获取，默认为生存模式
+                
             viewer.getTabList().addEntry(TabListEntry.builder()
                 .profile(target.getGameProfile())
                 .displayName(displayName)
                 .tabList(viewer.getTabList())
                 .latency((int) target.getPing())
-                .gameMode(0)
+                .gameMode(gameMode)  // 使用正确的游戏模式
                 .build());
         }
     }

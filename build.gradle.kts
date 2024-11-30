@@ -108,15 +108,6 @@ tasks {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
-    
-    // 设置源代码目录
-    sourceSets {
-        main {
-            java {
-                srcDir("src/main/java")
-            }
-        }
-    }
 }
 
 fun isNonStable(version: String): Boolean {
@@ -129,11 +120,15 @@ fun isNonStable(version: String): Boolean {
 sourceSets {
     main {
         java {
-            // 使用相对路径并确保源代码目录正确
-            srcDir("src/main/java")
+            // 使用标准的源代码目录配置
+            srcDirs(setOf("src/main/java"))
+            // 确保源代码目录存在
+            java.srcDir("src/main/java")
         }
         resources {
-            srcDir("src/main/resources")
+            srcDirs(setOf("src/main/resources"))
+            // 确保资源目录存在
+            resources.srcDir("src/main/resources")
         }
     }
 }
@@ -141,4 +136,10 @@ sourceSets {
 // 确保使用正确的编码
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+}
+
+// 添加 Java 插件配置
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 } 
