@@ -19,15 +19,18 @@ repositories {
         name = "spongepowered"
         url = uri("https://repo.spongepowered.org/repository/maven-public/")
     }
-    maven {
-        name = "aliyun"
-        url = uri("https://maven.aliyun.com/repository/public")
-    }
 }
 
 dependencies {
+    // Velocity API
     compileOnly("com.velocitypowered:velocity-api:3.1.1")
     annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
+    
+    // 添加 Guice 依赖
+    compileOnly("com.google.inject:guice:5.1.0")
+    
+    // 添加 SLF4J 依赖
+    compileOnly("org.slf4j:slf4j-api:1.7.32")
     
     // 配置文件处理
     implementation("org.spongepowered:configurate-core:4.1.2")
@@ -105,6 +108,15 @@ tasks {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+    
+    // 设置源代码目录
+    sourceSets {
+        main {
+            java {
+                srcDir("src/main/java")
+            }
+        }
+    }
 }
 
 fun isNonStable(version: String): Boolean {
@@ -117,10 +129,11 @@ fun isNonStable(version: String): Boolean {
 sourceSets {
     main {
         java {
-            srcDirs(projectDir.resolve("src/main/java").absolutePath)
+            // 使用相对路径并确保源代码目录正确
+            srcDir("src/main/java")
         }
         resources {
-            srcDirs(projectDir.resolve("src/main/resources").absolutePath)
+            srcDir("src/main/resources")
         }
     }
 }
@@ -128,8 +141,4 @@ sourceSets {
 // 确保使用正确的编码
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
-    // 明确指定源代码目录
-    sourceSets.main.get().java.srcDirs.forEach { srcDir ->
-        source(srcDir)
-    }
 } 
