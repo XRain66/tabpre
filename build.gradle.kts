@@ -118,9 +118,7 @@ sourceSets {
     main {
         java {
             setSrcDirs(listOf("src/main/java"))
-        }
-        resources {
-            setSrcDirs(listOf("src/main/resources"))
+            srcDir("src/main/java")
         }
     }
 } 

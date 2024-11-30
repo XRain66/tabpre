@@ -50,6 +50,7 @@ public class TabListListener {
                 TabListEntry.builder()
                     .profile(target.getGameProfile())
                     .displayName(displayName)
+                    .tabList(viewer.getTabList())
                     .build()
             );
         }
@@ -57,12 +58,13 @@ public class TabListListener {
 
     private void updatePlayerForAll(Player target) {
         Component displayName = getDisplayName(target);
-        TabListEntry entry = TabListEntry.builder()
-            .profile(target.getGameProfile())
-            .displayName(displayName)
-            .build();
-            
+        
         for (Player viewer : server.getAllPlayers()) {
+            TabListEntry entry = TabListEntry.builder()
+                .profile(target.getGameProfile())
+                .displayName(displayName)
+                .tabList(viewer.getTabList())
+                .build();
             viewer.getTabList().addEntry(entry);
         }
     }
