@@ -23,11 +23,10 @@ java {
 sourceSets {
     main {
         java {
-            srcDirs(layout.projectDirectory.dir("src/main/java"))
-            include("com/example/tabprefabric/**")
+            srcDirs(project.file("src/main/java").absolutePath)
         }
         resources {
-            srcDirs(layout.projectDirectory.dir("src/main/resources"))
+            srcDirs(project.file("src/main/resources").absolutePath)
         }
     }
 }
@@ -53,6 +52,11 @@ tasks {
         from("LICENSE") {
             rename { "${it}_${base.archivesName.get()}" }
         }
+    }
+    
+    compileJava {
+        options.encoding = "UTF-8"
+        source = sourceSets.main.get().java.sourceDirectories
     }
 }
 
