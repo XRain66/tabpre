@@ -20,10 +20,12 @@ import java.util.Map;
 public class TabListListener {
     private final TabPreConfig config;
     private final ProxyServer server;
+    private final Object plugin;
 
-    public TabListListener(TabPreConfig config, ProxyServer server) {
+    public TabListListener(TabPreConfig config, ProxyServer server, Object plugin) {
         this.config = config;
         this.server = server;
+        this.plugin = plugin;
     }
 
     @Subscribe
@@ -31,7 +33,7 @@ public class TabListListener {
         Player player = event.getPlayer();
         // 延迟 500ms 后更新所有玩家的 TabList
         server.getScheduler()
-            .buildTask(this, () -> {
+            .buildTask(plugin, () -> {
                 Map<UUID, TabListEntry> originalEntries = new HashMap<>();
                 player.getTabList().getEntries().forEach(entry -> 
                     originalEntries.put(entry.getProfile().getId(), entry));
@@ -48,7 +50,7 @@ public class TabListListener {
         Player player = event.getPlayer();
         // 延迟 500ms 后更新所有玩家的 TabList
         server.getScheduler()
-            .buildTask(this, () -> {
+            .buildTask(plugin, () -> {
                 Map<UUID, TabListEntry> originalEntries = new HashMap<>();
                 player.getTabList().getEntries().forEach(entry -> 
                     originalEntries.put(entry.getProfile().getId(), entry));
@@ -62,20 +64,11 @@ public class TabListListener {
 
     @Subscribe
     public void onServerConnected(ServerConnectedEvent event) {
-        // 获取玩家的游戏模式信息
-        Player player = event.getPlayer();
-        
-        // 延迟 500ms 后更新所有玩家的 TabList，确保已经收到了后端服务器的 TabList 数据
+        // 使用保存的插件实例
         server.getScheduler()
-            .buildTask(this, () -> {
-                // 获取当前玩家的 TabList 信息（这时已经包含了后端服务器发送的信息）
-                Map<UUID, TabListEntry> originalEntries = new HashMap<>();
-                player.getTabList().getEntries().forEach(entry -> 
-                    originalEntries.put(entry.getProfile().getId(), entry));
-                
-                // 为所有在线玩家更新 TabList，但保持原有的游戏模式和其他信息
-                server.getAllPlayers().forEach(viewer -> 
-                    updateTabListForPlayer(viewer, originalEntries));
+            .buildTask(plugin, () -> {
+                // 为所有在线玩家更新 TabList
+                server.getAllPlayers().forEach(this::updateTabListForPlayer);
             })
             .delay(500, TimeUnit.MILLISECONDS)
             .schedule();

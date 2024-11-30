@@ -43,8 +43,8 @@ public class TabPrePlugin {
             // 加载配置
             config.load();
             
-            // 创建并注册事件监听器
-            tabListListener = new TabListListener(config, server);
+            // 创建并注册事件监听器，传入 this 作为插件实例
+            tabListListener = new TabListListener(config, server, this);
             server.getEventManager().register(this, tabListListener);
             
             // 注册命令
