@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version "0.8-SNAPSHOT"
+    id("fabric-loom")
 }
 
 base {
@@ -15,21 +15,26 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:0.37.0+1.17")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 sourceSets {
     main {
         java {
-            // 使用完整的源代码路径
-            srcDirs(layout.projectDirectory.dir("src/main/java"))
+            srcDir("src/main/java")
+            include("com/example/tabprefabric/**")
+            setSrcDirs(listOf("src/main/java"))
         }
         resources {
-            srcDirs(layout.projectDirectory.dir("src/main/resources"))
+            srcDir("src/main/resources")
         }
     }
 }
 
 loom {
     runs {
-        // 添加 Mixin 配置
         server {
             property("mixin.debug", "true")
             property("mixin.debug.export", "true")
