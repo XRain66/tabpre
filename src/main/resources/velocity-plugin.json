@@ -1,8 +1,9 @@
 {
-  "id": "example_plugin",
-  "name": "Example Plugin",
+  "id": "tabpre",
+  "name": "TabPre",
   "version": "1.0.0",
-  "description": "一个示例 Velocity 插件",
-  "authors": ["YourName"],
-  "main": "com.example.velocityplugin.ExamplePlugin"
+  "description": "一个用于自定义玩家Tab列表前缀的Velocity插件",
+  "authors": ["Your Organization"],
+  "dependencies": [],
+  "main": "com.example.velocityplugin.TabPrePlugin"
 } 
