@@ -10,6 +10,9 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.player.TabListEntry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class TabListListener {
     private final TabPreConfig config;
@@ -23,18 +26,14 @@ public class TabListListener {
     @Subscribe
     public void onPlayerJoin(PostLoginEvent event) {
         Player joiningPlayer = event.getPlayer();
-        // 为新加入的玩家更新所有玩家的显示名称
-        updateTabListForPlayer(joiningPlayer);
-        // 为所有在线玩家更新新玩家的显示名称
-        updatePlayerForAll(joiningPlayer);
+        // 只需要调用一次 updateTabListForPlayer 就足够了
+        server.getAllPlayers().forEach(this::updateTabListForPlayer);
     }
 
     @Subscribe
     public void onServerConnected(ServerConnectedEvent event) {
         // 当玩家切换服务器时更新
-        Player player = event.getPlayer();
-        updateTabListForPlayer(player);
-        updatePlayerForAll(player);
+        server.getAllPlayers().forEach(this::updateTabListForPlayer);
     }
 
     @Subscribe
@@ -47,30 +46,14 @@ public class TabListListener {
     }
 
     private void updateTabListForPlayer(Player viewer) {
-        // 完全清空当前玩家的 TabList
-        viewer.getTabList().clearAll();
+        // 先移除所有现有条目
+        Set<UUID> existingEntries = new HashSet<>();
+        viewer.getTabList().getEntries().forEach(entry -> existingEntries.add(entry.getProfile().getId()));
+        existingEntries.forEach(uuid -> viewer.getTabList().removeEntry(uuid));
         
         // 重新添加所有玩家
         for (Player target : server.getAllPlayers()) {
             Component displayName = getDisplayName(target);
-            viewer.getTabList().addEntry(TabListEntry.builder()
-                .profile(target.getGameProfile())
-                .displayName(displayName)
-                .tabList(viewer.getTabList())
-                .latency((int) target.getPing())
-                .gameMode(0)
-                .build());
-        }
-    }
-
-    private void updatePlayerForAll(Player target) {
-        Component displayName = getDisplayName(target);
-        
-        for (Player viewer : server.getAllPlayers()) {
-            // 先移除目标玩家的条目
-            viewer.getTabList().removeEntry(target.getUniqueId());
-            
-            // 添加新的条目
             viewer.getTabList().addEntry(TabListEntry.builder()
                 .profile(target.getGameProfile())
                 .displayName(displayName)
