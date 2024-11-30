@@ -64,11 +64,18 @@ public class TabListListener {
 
     @Subscribe
     public void onServerConnected(ServerConnectedEvent event) {
+        Player player = event.getPlayer();
         // 使用保存的插件实例
         server.getScheduler()
             .buildTask(plugin, () -> {
+                // 获取当前玩家的 TabList 信息
+                Map<UUID, TabListEntry> originalEntries = new HashMap<>();
+                player.getTabList().getEntries().forEach(entry -> 
+                    originalEntries.put(entry.getProfile().getId(), entry));
+                
                 // 为所有在线玩家更新 TabList
-                server.getAllPlayers().forEach(this::updateTabListForPlayer);
+                server.getAllPlayers().forEach(viewer -> 
+                    updateTabListForPlayer(viewer, originalEntries));
             })
             .delay(500, TimeUnit.MILLISECONDS)
             .schedule();
