@@ -49,7 +49,9 @@ public class TabListListener {
     private void updateTabListForPlayer(Player viewer) {
         for (Player target : server.getAllPlayers()) {
             Component displayName = getDisplayName(target);
-            // 直接创建或更新 TabList 条目
+            // 先移除旧条目
+            viewer.getTabList().removeEntry(target.getUniqueId());
+            // 再添加新条目
             viewer.getTabList().addEntry(TabListEntry.builder()
                 .profile(target.getGameProfile())
                 .displayName(displayName)
@@ -62,7 +64,9 @@ public class TabListListener {
         Component displayName = getDisplayName(target);
         
         for (Player viewer : server.getAllPlayers()) {
-            // 直接创建或更新 TabList 条目
+            // 先移除旧条目
+            viewer.getTabList().removeEntry(target.getUniqueId());
+            // 再添加新条目
             viewer.getTabList().addEntry(TabListEntry.builder()
                 .profile(target.getGameProfile())
                 .displayName(displayName)
