@@ -54,11 +54,11 @@ public class TabListListener {
                 .profile(target.getGameProfile())
                 .displayName(displayName)
                 .tabList(viewer.getTabList())
-                .latency(target.getPing())  // 保持延迟显示
-                .gameMode(0)  // 保持默认游戏模式
+                .latency((int) target.getPing())  // 转换为 int
+                .gameMode(0)
                 .build();
             
-            // 先移除旧条目，再添加新条目
+            // 确保先移除旧条目
             viewer.getTabList().removeEntry(target.getUniqueId());
             viewer.getTabList().addEntry(entry);
         }
@@ -72,11 +72,11 @@ public class TabListListener {
                 .profile(target.getGameProfile())
                 .displayName(displayName)
                 .tabList(viewer.getTabList())
-                .latency(target.getPing())  // 保持延迟显示
-                .gameMode(0)  // 保持默认游戏模式
+                .latency((int) target.getPing())  // 转换为 int
+                .gameMode(0)
                 .build();
             
-            // 先移除旧条目，再添加新条目
+            // 确保先移除旧条目
             viewer.getTabList().removeEntry(target.getUniqueId());
             viewer.getTabList().addEntry(entry);
         }

@@ -117,10 +117,17 @@ fun isNonStable(version: String): Boolean {
 sourceSets {
     main {
         java {
-            srcDir("src/main/java")
+            srcDirs(setOf("src/main/java"))
+            java.srcDir("src/main/java")
         }
         resources {
-            srcDir("src/main/resources")
+            srcDirs(setOf("src/main/resources"))
+            resources.srcDir("src/main/resources")
         }
     }
+}
+
+// 添加编码设置
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
 } 
