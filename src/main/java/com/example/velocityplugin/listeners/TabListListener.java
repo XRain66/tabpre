@@ -43,21 +43,21 @@ public class TabListListener {
     }
 
     private void updateTabListForPlayer(Player viewer) {
-        // 更新指定玩家的Tab列表中所有玩家的显示名称
         for (Player target : server.getAllPlayers()) {
             Component displayName = getDisplayName(target);
-            viewer.getTabList().addEntry(target.getTabList().getEntry(target.getUniqueId())
-                .setDisplayName(displayName));
+            target.getTabList().getEntry(target.getUniqueId()).ifPresent(entry -> 
+                viewer.getTabList().addEntry(entry.setDisplayName(displayName))
+            );
         }
     }
 
     private void updatePlayerForAll(Player target) {
-        // 为所有在线玩家更新指定玩家的显示名称
         Component displayName = getDisplayName(target);
-        for (Player viewer : server.getAllPlayers()) {
-            viewer.getTabList().addEntry(target.getTabList().getEntry(target.getUniqueId())
-                .setDisplayName(displayName));
-        }
+        target.getTabList().getEntry(target.getUniqueId()).ifPresent(entry -> {
+            for (Player viewer : server.getAllPlayers()) {
+                viewer.getTabList().addEntry(entry.setDisplayName(displayName));
+            }
+        });
     }
 
     private Component getDisplayName(Player player) {
