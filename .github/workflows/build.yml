@@ -1,142 +1,23 @@
 name: Build
-
-on:
-  push:
-    branches: [ "main" ]
-    tags: [ "v*" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 0'  # 每周日运行一次
-
-permissions:
-  contents: write
-  checks: write
-  pull-requests: write
+on: [push, pull_request]
 
 jobs:
-  validate:
-    name: Validate Gradle Wrapper
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: gradle/wrapper-validation-action@v1
-
-  build:
-    needs: validate
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: 'gradle'
-        
-    - name: Setup Gradle Wrapper
-      run: |
-        gradle wrapper
-        chmod +x gradlew
-        
-    - name: Cache Gradle packages and build outputs
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-          build
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/gradle.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-    
-    - name: Fix gradlew file permissions and line endings
-      run: |
-        git update-index --chmod=+x gradlew
-        sed -i 's/\r$//' gradlew
-        chmod +x gradlew
-        
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-home-cache-cleanup: true
-    
-    - name: Check code style
-      run: ./gradlew checkstyleMain checkstyleTest
-      continue-on-error: true
-    
-    - name: Execute Gradle build with tests and coverage
-      run: ./gradlew build test jacocoTestReport
-      
-    - name: Execute Gradle shadowJar
-      run: ./gradlew shadowJar
-      
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: TabPre
-        path: build/libs/*.jar
-        if-no-files-found: error
-        
-    - name: Upload test and coverage results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: reports
-        path: |
-          build/reports/tests/
-          build/reports/checkstyle/
-          build/reports/jacoco/
-          
-    - name: Publish Test Report
-      uses: mikepenz/action-junit-report@v3
-      if: always()
-      with:
-        report_paths: '**/build/test-results/test/TEST-*.xml'
-        
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: build/libs/*.jar
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Cleanup Gradle Cache
-      run: |
-        rm -f ~/.gradle/caches/modules-2/modules-2.lock
-        rm -f ~/.gradle/caches/modules-2/gc.properties
-        
-  dependency-check:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        
-    - name: Setup Gradle Wrapper
-      run: gradle wrapper
-        
-    - name: Check dependencies
-      run: ./gradlew dependencyUpdates
-      
-    - name: Create dependency update issue
-      if: failure()
-      uses: peter-evans/create-issue-from-file@v4
-      with:
-        title: 依赖更新检查
-        content-filepath: build/dependencyUpdates/report.txt
-        labels: dependencies
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Build Velocity plugin
+        run: ./gradlew velocity:build
+      - name: Build Fabric mod
+        run: ./gradlew fabric:build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Artifacts
+          path: |
+            velocity/build/libs/
+            fabric/build/libs/

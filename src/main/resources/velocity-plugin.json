@@ -1,9 +1,0 @@
-{
-  "id": "tabpre",
-  "name": "TabPre",
-  "version": "1.0.0",
-  "description": "一个用于自定义玩家Tab列表前缀的Velocity插件",
-  "authors": ["Your Organization"],
-  "dependencies": [],
-  "main": "com.example.velocityplugin.TabPrePlugin"
-} 
