@@ -16,4 +16,5 @@ messages:
   help-message: |
     &6=== TabPre 帮助 ===
     &f/tabprefix reload - 重新加载配置
+    &f/tabprefix debug <玩家名字> - 显示玩家的 TabList 信息
     &f/tabprefix help - 显示此帮助信息 

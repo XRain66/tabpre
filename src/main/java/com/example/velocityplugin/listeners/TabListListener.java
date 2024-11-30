@@ -65,20 +65,29 @@ public class TabListListener {
     @Subscribe
     public void onServerConnected(ServerConnectedEvent event) {
         Player player = event.getPlayer();
-        // 使用保存的插件实例
-        server.getScheduler()
-            .buildTask(plugin, () -> {
-                // 获取当前玩家的 TabList 信息
-                Map<UUID, TabListEntry> originalEntries = new HashMap<>();
-                player.getTabList().getEntries().forEach(entry -> 
-                    originalEntries.put(entry.getProfile().getId(), entry));
-                
-                // 为所有在线玩家更新 TabList
-                server.getAllPlayers().forEach(viewer -> 
-                    updateTabListForPlayer(viewer, originalEntries));
-            })
-            .delay(500, TimeUnit.MILLISECONDS)
-            .schedule();
+        
+        // 获取玩家的服务器连接
+        player.getCurrentServer().ifPresent(serverConnection -> {
+            // 延迟获取游戏模式信息
+            server.getScheduler()
+                .buildTask(plugin, () -> {
+                    // 从所有玩家的 TabList 中收集信息
+                    Map<UUID, TabListEntry> originalEntries = new HashMap<>();
+                    
+                    // 尝试从当前服务器连接中获取信息
+                    serverConnection.getServer().getPlayersConnected().forEach(p -> 
+                        p.getTabList().getEntry(player.getUniqueId()).ifPresent(entry ->
+                            originalEntries.put(player.getUniqueId(), entry)
+                        )
+                    );
+                    
+                    // 更新所有玩家的 TabList
+                    server.getAllPlayers().forEach(viewer -> 
+                        updateTabListForPlayer(viewer, originalEntries));
+                })
+                .delay(500, TimeUnit.MILLISECONDS)
+                .schedule();
+        });
     }
 
     private void updateTabListForPlayer(Player viewer, Map<UUID, TabListEntry> originalEntries) {

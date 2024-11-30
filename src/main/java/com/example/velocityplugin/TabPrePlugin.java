@@ -43,12 +43,13 @@ public class TabPrePlugin {
             // 加载配置
             config.load();
             
-            // 创建并注册事件监听器，传入 this 作为插件实例
+            // 创建并注册事件监听器
             tabListListener = new TabListListener(config, server, this);
             server.getEventManager().register(this, tabListListener);
             
-            // 注册命令
-            server.getCommandManager().register("tabprefix", new TabPreCommand(config, tabListListener));
+            // 注册命令，传入 server 实例
+            server.getCommandManager().register("tabprefix", 
+                new TabPreCommand(config, tabListListener, server));
             
             logger.info("TabPre插件已成功启动！");
         } catch (IOException e) {

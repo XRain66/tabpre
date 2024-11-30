@@ -4,6 +4,8 @@ import com.example.velocityplugin.config.TabPreConfig;
 import com.example.velocityplugin.listeners.TabListListener;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
+import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.player.TabListEntry;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.io.IOException;
@@ -14,10 +16,12 @@ import java.util.concurrent.CompletableFuture;
 public class TabPreCommand implements SimpleCommand {
     private final TabPreConfig config;
     private final TabListListener tabListListener;
+    private final ProxyServer server;
 
-    public TabPreCommand(TabPreConfig config, TabListListener tabListListener) {
+    public TabPreCommand(TabPreConfig config, TabListListener tabListListener, ProxyServer server) {
         this.config = config;
         this.tabListListener = tabListListener;
+        this.server = server;
     }
 
     @Override
@@ -44,9 +48,32 @@ public class TabPreCommand implements SimpleCommand {
                     sendMessage(source, "&c配置重载失败！请检查控制台获取详细信息。");
                 }
                 break;
-            case "help":
-                sendMessage(source, config.getMessage("help-message"));
+            case "debug":
+                if (args.length < 2) {
+                    sendMessage(source, "&c用法: /tabprefix debug <玩家名字>");
+                    return;
+                }
+                String playerName = args[1];
+                server.getPlayer(playerName).ifPresentOrElse(
+                    player -> {
+                        // 获取玩家的 TabList 信息
+                        TabListEntry entry = player.getTabList().getEntry(player.getUniqueId())
+                            .orElse(null);
+                        if (entry != null) {
+                            sendMessage(source, "&6=== TabList Debug 信息 ===");
+                            sendMessage(source, "&e玩家名: &f" + player.getUsername());
+                            sendMessage(source, "&e显示名称: &f" + entry.getDisplayName().toString());
+                            sendMessage(source, "&e游戏模式: &f" + entry.getGameMode());
+                            sendMessage(source, "&e延迟: &f" + entry.getLatency());
+                            sendMessage(source, "&e UUID: &f" + entry.getProfile().getId());
+                        } else {
+                            sendMessage(source, "&c无法获取玩家的 TabList 信息");
+                        }
+                    },
+                    () -> sendMessage(source, "&c找不到玩家: " + playerName)
+                );
                 break;
+            case "help":
             default:
                 sendMessage(source, config.getMessage("help-message"));
                 break;
