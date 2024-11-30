@@ -89,6 +89,10 @@ tasks {
     build {
         dependsOn(shadowJar)
     }
+    
+    processResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
 }
 
 java {
@@ -105,11 +109,7 @@ fun isNonStable(version: String): Boolean {
 
 sourceSets {
     main {
-        java {
-            srcDirs("src/main/java")
-            resources {
-                srcDirs("src/main/resources")
-            }
-        }
+        java.srcDirs("src/main/java")
+        resources.srcDirs("src/main/resources")
     }
 } 
