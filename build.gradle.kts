@@ -121,14 +121,10 @@ sourceSets {
     main {
         java {
             // 使用标准的源代码目录配置
-            srcDirs(setOf("src/main/java"))
-            // 确保源代码目录存在
-            java.srcDir("src/main/java")
+            srcDirs("src/main/java")
         }
         resources {
-            srcDirs(setOf("src/main/resources"))
-            // 确保资源目录存在
-            resources.srcDir("src/main/resources")
+            srcDirs("src/main/resources")
         }
     }
 }
