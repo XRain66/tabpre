@@ -23,12 +23,11 @@ java {
 sourceSets {
     main {
         java {
-            srcDir("src/main/java")
+            srcDirs(layout.projectDirectory.dir("src/main/java"))
             include("com/example/tabprefabric/**")
-            setSrcDirs(listOf("src/main/java"))
         }
         resources {
-            srcDir("src/main/resources")
+            srcDirs(layout.projectDirectory.dir("src/main/resources"))
         }
     }
 }
