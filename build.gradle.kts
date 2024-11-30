@@ -117,8 +117,10 @@ fun isNonStable(version: String): Boolean {
 sourceSets {
     main {
         java {
-            setSrcDirs(listOf("src/main/java"))
             srcDir("src/main/java")
+        }
+        resources {
+            srcDir("src/main/resources")
         }
     }
 } 

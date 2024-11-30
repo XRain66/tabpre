@@ -39,13 +39,22 @@ public class TabListListener {
 
     @Subscribe
     public void onPlayerDisconnect(DisconnectEvent event) {
-        // 玩家断开连接时，为其他玩家更新Tab列表
-        server.getAllPlayers().forEach(this::updateTabListForPlayer);
+        Player disconnectedPlayer = event.getPlayer();
+        // 只更新其他在线玩家的 Tab 列表
+        server.getAllPlayers().stream()
+            .filter(p -> !p.equals(disconnectedPlayer))
+            .forEach(this::updateTabListForPlayer);
     }
 
     private void updateTabListForPlayer(Player viewer) {
         for (Player target : server.getAllPlayers()) {
+            // 如果目标玩家就是查看者，可以跳过
+            if (target.equals(viewer)) {
+                continue;
+            }
+            
             Component displayName = getDisplayName(target);
+            viewer.getTabList().removeEntry(target.getUniqueId());
             viewer.getTabList().addEntry(
                 TabListEntry.builder()
                     .profile(target.getGameProfile())
@@ -60,6 +69,12 @@ public class TabListListener {
         Component displayName = getDisplayName(target);
         
         for (Player viewer : server.getAllPlayers()) {
+            // 跳过目标玩家自己
+            if (target.equals(viewer)) {
+                continue;
+            }
+            
+            viewer.getTabList().removeEntry(target.getUniqueId());
             TabListEntry entry = TabListEntry.builder()
                 .profile(target.getGameProfile())
                 .displayName(displayName)
@@ -81,8 +96,9 @@ public class TabListListener {
 
     // 提供一个公共方法用于手动更新所有玩家的Tab列表（例如配置重载后）
     public void refreshAllPlayers() {
-        for (Player player : server.getAllPlayers()) {
-            updateTabListForPlayer(player);
+        for (Player viewer : server.getAllPlayers()) {
+            updateTabListForPlayer(viewer);
+            updatePlayerForAll(viewer);
         }
     }
 } 
