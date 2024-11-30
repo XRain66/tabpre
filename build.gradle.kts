@@ -32,7 +32,9 @@ dependencies {
     // 配置文件处理
     implementation("org.spongepowered:configurate-core:4.1.2")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
-    implementation("org.yaml:snakeyaml:2.2")
+    implementation("org.yaml:snakeyaml:2.2") {
+        exclude(group = "org.yaml", module = "snakeyaml-engine")
+    }
     
     // 测试依赖
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
@@ -46,7 +48,12 @@ tasks {
         
         // 重定位依赖，避免冲突
         relocate("org.spongepowered.configurate", "com.example.velocityplugin.libs.configurate")
+        relocate("io.leangen.geantyref", "com.example.velocityplugin.libs.geantyref")
         relocate("org.yaml.snakeyaml", "com.example.velocityplugin.libs.snakeyaml")
+        
+        // 排除不需要的文件
+        minimize()
+        mergeServiceFiles()
     }
     
     test {
@@ -77,6 +84,10 @@ tasks {
         rejectVersionIf {
             isNonStable(candidate.version)
         }
+    }
+    
+    build {
+        dependsOn(shadowJar)
     }
 }
 
