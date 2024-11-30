@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.player.TabListEntry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -45,19 +46,25 @@ public class TabListListener {
     private void updateTabListForPlayer(Player viewer) {
         for (Player target : server.getAllPlayers()) {
             Component displayName = getDisplayName(target);
-            target.getTabList().getEntry(target.getUniqueId()).ifPresent(entry -> 
-                viewer.getTabList().addEntry(entry.setDisplayName(displayName))
+            viewer.getTabList().addEntry(
+                TabListEntry.builder()
+                    .profile(target.getGameProfile())
+                    .displayName(displayName)
+                    .build()
             );
         }
     }
 
     private void updatePlayerForAll(Player target) {
         Component displayName = getDisplayName(target);
-        target.getTabList().getEntry(target.getUniqueId()).ifPresent(entry -> {
-            for (Player viewer : server.getAllPlayers()) {
-                viewer.getTabList().addEntry(entry.setDisplayName(displayName));
-            }
-        });
+        TabListEntry entry = TabListEntry.builder()
+            .profile(target.getGameProfile())
+            .displayName(displayName)
+            .build();
+            
+        for (Player viewer : server.getAllPlayers()) {
+            viewer.getTabList().addEntry(entry);
+        }
     }
 
     private Component getDisplayName(Player player) {

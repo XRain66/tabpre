@@ -26,8 +26,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
-    annotationProcessor("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
+    compileOnly("com.velocitypowered:velocity-api:3.1.1")
+    annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
     
     // 配置文件处理
     implementation("org.spongepowered:configurate-core:4.1.2")
@@ -116,7 +116,11 @@ fun isNonStable(version: String): Boolean {
 
 sourceSets {
     main {
-        java.srcDirs("src/main/java")
-        resources.srcDirs("src/main/resources")
+        java {
+            setSrcDirs(listOf("src/main/java"))
+        }
+        resources {
+            setSrcDirs(listOf("src/main/resources"))
+        }
     }
 } 
