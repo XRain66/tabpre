@@ -1,6 +1,6 @@
 # TabPre - Velocity Tab列表前缀插件
 
-[![Build Status](https://github.com/[你的用户名]/[仓库名]/workflows/Build/badge.svg)](https://github.com/[你的用户名]/[仓库名]/actions)
+[![Build Status](https://github.com/XRain66/tabpre/workflows/Build/badge.svg)](https://github.com/XRain66/tabpre/actions)
 
 一个用于自定义玩家Tab列表前缀的Velocity插件。
 
@@ -64,16 +64,6 @@ prefixes:
 ### 构建
 ```bash
 ./gradlew build
-```
-
-### 测试
-```bash
-./gradlew test
-```
-
-### 代码质量
-```bash
-./gradlew checkstyleMain
 ```
 
 ## 支持

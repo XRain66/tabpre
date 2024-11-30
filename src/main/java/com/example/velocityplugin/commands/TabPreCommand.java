@@ -1,9 +1,9 @@
 package com.example.velocityplugin.commands;
 
 import com.example.velocityplugin.config.TabPreConfig;
+import com.example.velocityplugin.listeners.TabListListener;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.io.IOException;
@@ -13,9 +13,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class TabPreCommand implements SimpleCommand {
     private final TabPreConfig config;
+    private final TabListListener tabListListener;
 
-    public TabPreCommand(TabPreConfig config) {
+    public TabPreCommand(TabPreConfig config, TabListListener tabListListener) {
         this.config = config;
+        this.tabListListener = tabListListener;
     }
 
     @Override
@@ -36,6 +38,7 @@ public class TabPreCommand implements SimpleCommand {
                 }
                 try {
                     config.load();
+                    tabListListener.refreshAllPlayers();
                     sendMessage(source, config.getMessage("reload-success"));
                 } catch (IOException e) {
                     sendMessage(source, "&c配置重载失败！请检查控制台获取详细信息。");

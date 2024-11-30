@@ -27,6 +27,7 @@ public class TabPrePlugin {
     private final Logger logger;
     private final TabPreConfig config;
     private final Path dataDirectory;
+    private TabListListener tabListListener;
 
     @Inject
     public TabPrePlugin(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
@@ -42,11 +43,12 @@ public class TabPrePlugin {
             // 加载配置
             config.load();
             
-            // 注册命令
-            server.getCommandManager().register("tabprefix", new TabPreCommand(config));
+            // 创建并注册事件监听器
+            tabListListener = new TabListListener(config, server);
+            server.getEventManager().register(this, tabListListener);
             
-            // 注册事件监听器
-            server.getEventManager().register(this, new TabListListener(config));
+            // 注册命令
+            server.getCommandManager().register("tabprefix", new TabPreCommand(config, tabListListener));
             
             logger.info("TabPre插件已成功启动！");
         } catch (IOException e) {

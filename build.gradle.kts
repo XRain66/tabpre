@@ -26,10 +26,15 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.velocitypowered:velocity-api:3.1.1")
-    annotationProcessor("com.velocitypowered:velocity-api:3.1.1")
-    implementation("org.spongepowered:configurate-yaml:4.1.2")
+    compileOnly("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
+    annotationProcessor("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
     
+    // 配置文件处理
+    implementation("org.spongepowered:configurate-core:4.1.2")
+    implementation("org.spongepowered:configurate-yaml:4.1.2")
+    implementation("org.yaml:snakeyaml:2.2")
+    
+    // 测试依赖
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     testImplementation("org.mockito:mockito-core:5.3.1")
 }
@@ -38,6 +43,10 @@ tasks {
     shadowJar {
         archiveBaseName.set(project.name)
         archiveClassifier.set("")
+        
+        // 重定位依赖，避免冲突
+        relocate("org.spongepowered.configurate", "com.example.velocityplugin.libs.configurate")
+        relocate("org.yaml.snakeyaml", "com.example.velocityplugin.libs.snakeyaml")
     }
     
     test {
