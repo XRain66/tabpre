@@ -26,6 +26,50 @@ public class TabListListener {
         this.config = config;
         this.server = server;
         this.plugin = plugin;
+        
+        // 启动定时更新任务
+        startPeriodicUpdate();
+    }
+
+    private void startPeriodicUpdate() {
+        // 每 10 秒更新一次
+        server.getScheduler()
+            .buildTask(plugin, () -> {
+                // 获取所有在线玩家的信息
+                Map<UUID, TabListEntry> allEntries = new HashMap<>();
+                
+                // 遍历所有在线玩家
+                server.getAllPlayers().forEach(player -> {
+                    // 从玩家当前所在的后端服务器获取信息
+                    player.getCurrentServer().ifPresent(serverConnection -> {
+                        // 获取该服务器上的玩家信息
+                        serverConnection.getServer().getPlayersConnected().stream()
+                            .filter(p -> p.getUniqueId().equals(player.getUniqueId()))
+                            .findFirst()
+                            .ifPresent(p -> {
+                                // 从该服务器的 TabList 获取玩家信息
+                                p.getTabList().getEntries().stream()
+                                    .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+                                    .findFirst()
+                                    .ifPresent(entry -> {
+                                        allEntries.put(player.getUniqueId(), entry);
+                                        System.out.println("Periodic update from backend server: " + 
+                                            player.getUsername() + " on " + 
+                                            serverConnection.getServerInfo().getName() + 
+                                            " gamemode: " + entry.getGameMode());
+                                    });
+                            });
+                    });
+                });
+                
+                // 更新所有玩家的 TabList
+                if (!allEntries.isEmpty()) {
+                    server.getAllPlayers().forEach(viewer -> 
+                        updateTabListForPlayer(viewer, allEntries));
+                }
+            })
+            .repeat(10L, TimeUnit.SECONDS)
+            .schedule();
     }
 
     @Subscribe
@@ -36,14 +80,22 @@ public class TabListListener {
             .buildTask(plugin, () -> {
                 Map<UUID, TabListEntry> originalEntries = new HashMap<>();
                 
-                // 从所有玩家的 TabList 中收集信息
-                server.getAllPlayers().forEach(p -> {
-                    p.getTabList().getEntries().stream()
-                        .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+                // 从玩家当前所在的后端服务器获取信息
+                player.getCurrentServer().ifPresent(serverConnection -> {
+                    serverConnection.getServer().getPlayersConnected().stream()
+                        .filter(p -> p.getUniqueId().equals(player.getUniqueId()))
                         .findFirst()
-                        .ifPresent(entry -> {
-                            originalEntries.put(player.getUniqueId(), entry);
-                            System.out.println("Join: Found gamemode for " + player.getUsername() + ": " + entry.getGameMode());
+                        .ifPresent(p -> {
+                            p.getTabList().getEntries().stream()
+                                .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+                                .findFirst()
+                                .ifPresent(entry -> {
+                                    originalEntries.put(player.getUniqueId(), entry);
+                                    System.out.println("Join from backend server: " + 
+                                        player.getUsername() + " on " + 
+                                        serverConnection.getServerInfo().getName() + 
+                                        " gamemode: " + entry.getGameMode());
+                                });
                         });
                 });
                 
@@ -87,42 +139,31 @@ public class TabListListener {
         
         // 获取玩家的服务器连接
         player.getCurrentServer().ifPresent(serverConnection -> {
-            // 延迟获取游戏模式信息，增加延迟到 1500ms 以确保后端服务器有足够时间发送游戏模式
             server.getScheduler()
                 .buildTask(plugin, () -> {
                     Map<UUID, TabListEntry> originalEntries = new HashMap<>();
                     
-                    // 从所有玩家的 TabList 中收集信息
-                    server.getAllPlayers().forEach(p -> {
-                        p.getTabList().getEntries().stream()
-                            .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
-                            .findFirst()
-                            .ifPresent(entry -> {
-                                // 保存所有游戏模式信息
-                                originalEntries.put(player.getUniqueId(), entry);
-                                // 记录日志以便调试
-                                System.out.println("Found gamemode for " + player.getUsername() + ": " + entry.getGameMode());
-                            });
-                    });
+                    // 从后端服务器获取信息
+                    serverConnection.getServer().getPlayersConnected().stream()
+                        .filter(p -> p.getUniqueId().equals(player.getUniqueId()))
+                        .findFirst()
+                        .ifPresent(p -> {
+                            p.getTabList().getEntries().stream()
+                                .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+                                .findFirst()
+                                .ifPresent(entry -> {
+                                    originalEntries.put(player.getUniqueId(), entry);
+                                    System.out.println("Server connected from backend: " + 
+                                        player.getUsername() + " on " + 
+                                        serverConnection.getServerInfo().getName() + 
+                                        " gamemode: " + entry.getGameMode());
+                                });
+                        });
                     
-                    // 如果没有获取到游戏模式信息，再等待一段时间
+                    // 如果没有获取到信息，尝试重试
                     if (originalEntries.isEmpty()) {
                         server.getScheduler()
-                            .buildTask(plugin, () -> {
-                                Map<UUID, TabListEntry> retryEntries = new HashMap<>();
-                                server.getAllPlayers().forEach(p -> {
-                                    p.getTabList().getEntries().stream()
-                                        .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
-                                        .findFirst()
-                                        .ifPresent(entry -> {
-                                            retryEntries.put(player.getUniqueId(), entry);
-                                            // 记录重试日志
-                                            System.out.println("Retry: Found gamemode for " + player.getUsername() + ": " + entry.getGameMode());
-                                        });
-                                });
-                                server.getAllPlayers().forEach(viewer -> 
-                                    updateTabListForPlayer(viewer, retryEntries));
-                            })
+                            .buildTask(plugin, () -> retryGetGameMode(player))
                             .delay(500, TimeUnit.MILLISECONDS)
                             .schedule();
                     } else {
@@ -130,9 +171,35 @@ public class TabListListener {
                             updateTabListForPlayer(viewer, originalEntries));
                     }
                 })
-                .delay(1500, TimeUnit.MILLISECONDS)  // 增加延迟到 1500ms
+                .delay(1500, TimeUnit.MILLISECONDS)
                 .schedule();
         });
+    }
+
+    private void retryGetGameMode(Player player) {
+        Map<UUID, TabListEntry> retryEntries = new HashMap<>();
+        player.getCurrentServer().ifPresent(serverConnection -> {
+            serverConnection.getServer().getPlayersConnected().stream()
+                .filter(p -> p.getUniqueId().equals(player.getUniqueId()))
+                .findFirst()
+                .ifPresent(p -> {
+                    p.getTabList().getEntries().stream()
+                        .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+                        .findFirst()
+                        .ifPresent(entry -> {
+                            retryEntries.put(player.getUniqueId(), entry);
+                            System.out.println("Retry from backend: " + 
+                                player.getUsername() + " on " + 
+                                serverConnection.getServerInfo().getName() + 
+                                " gamemode: " + entry.getGameMode());
+                        });
+                });
+        });
+        
+        if (!retryEntries.isEmpty()) {
+            server.getAllPlayers().forEach(viewer -> 
+                updateTabListForPlayer(viewer, retryEntries));
+        }
     }
 
     private void updateTabListForPlayer(Player viewer, Map<UUID, TabListEntry> originalEntries) {
