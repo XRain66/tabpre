@@ -46,6 +46,9 @@ tasks {
         archiveBaseName.set(project.name)
         archiveClassifier.set("")
         
+        // 添加重复策略
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        
         // 重定位依赖，避免冲突
         relocate("org.spongepowered.configurate", "com.example.velocityplugin.libs.configurate")
         relocate("io.leangen.geantyref", "com.example.velocityplugin.libs.geantyref")
@@ -91,6 +94,10 @@ tasks {
     }
     
     processResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+    
+    jar {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 }
