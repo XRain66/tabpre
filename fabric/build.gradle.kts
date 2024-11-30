@@ -23,20 +23,21 @@ java {
 sourceSets {
     main {
         java {
-            srcDirs(layout.projectDirectory.dir("src/main/java"))
-            include("com/example/tabprefabric/**")
-            setSrcDirs(listOf("src/main/java"))
+            srcDir("src/main/java")
         }
         resources {
-            srcDirs(layout.projectDirectory.dir("src/main/resources"))
+            srcDir("src/main/resources")
         }
     }
 }
 
 loom {
-    @Suppress("UnstableApiUsage")
-    mixin {
-        defaultRefmapName.set("tabpre.refmap.json")
+    runs {
+        named("client") {
+            property("mixin.debug", "true")
+            property("mixin.debug.export", "true")
+            property("mixin.refmap", "tabpre.refmap.json")
+        }
     }
 }
 
@@ -57,8 +58,6 @@ tasks {
     compileJava {
         options.encoding = "UTF-8"
         source(sourceSets.main.get().java)
-        options.compilerArgs.add("-sourcepath")
-        options.compilerArgs.add(sourceSets.main.get().java.srcDirs.joinToString(File.pathSeparator))
     }
 }
 
