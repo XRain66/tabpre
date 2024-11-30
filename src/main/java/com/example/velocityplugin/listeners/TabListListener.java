@@ -49,10 +49,12 @@ public class TabListListener {
     private void updateTabListForPlayer(Player viewer) {
         for (Player target : server.getAllPlayers()) {
             Component displayName = getDisplayName(target);
-            // 使用 viewer 的 TabList 来获取和更新条目
-            viewer.getTabList().getEntry(target.getUniqueId()).ifPresent(entry -> {
-                viewer.getTabList().addEntry(entry.setDisplayName(displayName));
-            });
+            // 直接创建或更新 TabList 条目
+            viewer.getTabList().addEntry(TabListEntry.builder()
+                .profile(target.getGameProfile())
+                .displayName(displayName)
+                .tabList(viewer.getTabList())
+                .build());
         }
     }
 
@@ -60,10 +62,12 @@ public class TabListListener {
         Component displayName = getDisplayName(target);
         
         for (Player viewer : server.getAllPlayers()) {
-            // 使用 viewer 的 TabList 来获取和更新条目
-            viewer.getTabList().getEntry(target.getUniqueId()).ifPresent(entry -> {
-                viewer.getTabList().addEntry(entry.setDisplayName(displayName));
-            });
+            // 直接创建或更新 TabList 条目
+            viewer.getTabList().addEntry(TabListEntry.builder()
+                .profile(target.getGameProfile())
+                .displayName(displayName)
+                .tabList(viewer.getTabList())
+                .build());
         }
     }
 
@@ -79,9 +83,6 @@ public class TabListListener {
 
     // 提供一个公共方法用于手动更新所有玩家的Tab列表（例如配置重载后）
     public void refreshAllPlayers() {
-        for (Player viewer : server.getAllPlayers()) {
-            updateTabListForPlayer(viewer);
-            updatePlayerForAll(viewer);
-        }
+        server.getAllPlayers().forEach(this::updateTabListForPlayer);
     }
 } 
