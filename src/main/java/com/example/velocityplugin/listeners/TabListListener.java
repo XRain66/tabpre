@@ -31,34 +31,53 @@ public class TabListListener {
     @Subscribe
     public void onPlayerJoin(PostLoginEvent event) {
         Player player = event.getPlayer();
-        // 延迟 500ms 后更新所有玩家的 TabList
+        // 延迟获取游戏模式信息
         server.getScheduler()
             .buildTask(plugin, () -> {
                 Map<UUID, TabListEntry> originalEntries = new HashMap<>();
-                player.getTabList().getEntries().forEach(entry -> 
-                    originalEntries.put(entry.getProfile().getId(), entry));
+                
+                // 从所有玩家的 TabList 中收集信息
+                server.getAllPlayers().forEach(p -> {
+                    p.getTabList().getEntries().stream()
+                        .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+                        .findFirst()
+                        .ifPresent(entry -> {
+                            originalEntries.put(player.getUniqueId(), entry);
+                            System.out.println("Join: Found gamemode for " + player.getUsername() + ": " + entry.getGameMode());
+                        });
+                });
                 
                 server.getAllPlayers().forEach(viewer -> 
                     updateTabListForPlayer(viewer, originalEntries));
             })
-            .delay(500, TimeUnit.MILLISECONDS)
+            .delay(1500, TimeUnit.MILLISECONDS)
             .schedule();
     }
 
     @Subscribe
     public void onPlayerDisconnect(DisconnectEvent event) {
         Player player = event.getPlayer();
-        // 延迟 500ms 后更新所有玩家的 TabList
+        // 延迟更新其他玩家的 TabList
         server.getScheduler()
             .buildTask(plugin, () -> {
                 Map<UUID, TabListEntry> originalEntries = new HashMap<>();
-                player.getTabList().getEntries().forEach(entry -> 
-                    originalEntries.put(entry.getProfile().getId(), entry));
                 
-                server.getAllPlayers().forEach(viewer -> 
-                    updateTabListForPlayer(viewer, originalEntries));
+                // 从所有玩家的 TabList 中收集信息
+                server.getAllPlayers().forEach(p -> {
+                    p.getTabList().getEntries().stream()
+                        .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+                        .findFirst()
+                        .ifPresent(entry -> {
+                            originalEntries.put(player.getUniqueId(), entry);
+                            System.out.println("Disconnect: Found gamemode for " + player.getUsername() + ": " + entry.getGameMode());
+                        });
+                });
+                
+                server.getAllPlayers().stream()
+                    .filter(p -> !p.equals(player))
+                    .forEach(viewer -> updateTabListForPlayer(viewer, originalEntries));
             })
-            .delay(500, TimeUnit.MILLISECONDS)
+            .delay(1500, TimeUnit.MILLISECONDS)
             .schedule();
     }
 
@@ -68,23 +87,50 @@ public class TabListListener {
         
         // 获取玩家的服务器连接
         player.getCurrentServer().ifPresent(serverConnection -> {
-            // 延迟获取游戏模式信息
+            // 延迟获取游戏模式信息，增加延迟到 1500ms 以确保后端服务器有足够时间发送游戏模式
             server.getScheduler()
                 .buildTask(plugin, () -> {
                     Map<UUID, TabListEntry> originalEntries = new HashMap<>();
                     
-                    // 使用 getEntries() 而不是 getEntry()
-                    serverConnection.getServer().getPlayersConnected().forEach(p -> {
+                    // 从所有玩家的 TabList 中收集信息
+                    server.getAllPlayers().forEach(p -> {
                         p.getTabList().getEntries().stream()
                             .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
                             .findFirst()
-                            .ifPresent(entry -> originalEntries.put(player.getUniqueId(), entry));
+                            .ifPresent(entry -> {
+                                // 保存所有游戏模式信息
+                                originalEntries.put(player.getUniqueId(), entry);
+                                // 记录日志以便调试
+                                System.out.println("Found gamemode for " + player.getUsername() + ": " + entry.getGameMode());
+                            });
                     });
                     
-                    server.getAllPlayers().forEach(viewer -> 
-                        updateTabListForPlayer(viewer, originalEntries));
+                    // 如果没有获取到游戏模式信息，再等待一段时间
+                    if (originalEntries.isEmpty()) {
+                        server.getScheduler()
+                            .buildTask(plugin, () -> {
+                                Map<UUID, TabListEntry> retryEntries = new HashMap<>();
+                                server.getAllPlayers().forEach(p -> {
+                                    p.getTabList().getEntries().stream()
+                                        .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+                                        .findFirst()
+                                        .ifPresent(entry -> {
+                                            retryEntries.put(player.getUniqueId(), entry);
+                                            // 记录重试日志
+                                            System.out.println("Retry: Found gamemode for " + player.getUsername() + ": " + entry.getGameMode());
+                                        });
+                                });
+                                server.getAllPlayers().forEach(viewer -> 
+                                    updateTabListForPlayer(viewer, retryEntries));
+                            })
+                            .delay(500, TimeUnit.MILLISECONDS)
+                            .schedule();
+                    } else {
+                        server.getAllPlayers().forEach(viewer -> 
+                            updateTabListForPlayer(viewer, originalEntries));
+                    }
                 })
-                .delay(500, TimeUnit.MILLISECONDS)
+                .delay(1500, TimeUnit.MILLISECONDS)  // 增加延迟到 1500ms
                 .schedule();
         });
     }
