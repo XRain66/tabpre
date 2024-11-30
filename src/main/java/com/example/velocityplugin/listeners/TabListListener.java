@@ -71,17 +71,16 @@ public class TabListListener {
             // 延迟获取游戏模式信息
             server.getScheduler()
                 .buildTask(plugin, () -> {
-                    // 从所有玩家的 TabList 中收集信息
                     Map<UUID, TabListEntry> originalEntries = new HashMap<>();
                     
-                    // 尝试从当前服务器连接中获取信息
-                    serverConnection.getServer().getPlayersConnected().forEach(p -> 
-                        p.getTabList().getEntry(player.getUniqueId()).ifPresent(entry ->
-                            originalEntries.put(player.getUniqueId(), entry)
-                        )
-                    );
+                    // 使用 getEntries() 而不是 getEntry()
+                    serverConnection.getServer().getPlayersConnected().forEach(p -> {
+                        p.getTabList().getEntries().stream()
+                            .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+                            .findFirst()
+                            .ifPresent(entry -> originalEntries.put(player.getUniqueId(), entry));
+                    });
                     
-                    // 更新所有玩家的 TabList
                     server.getAllPlayers().forEach(viewer -> 
                         updateTabListForPlayer(viewer, originalEntries));
                 })

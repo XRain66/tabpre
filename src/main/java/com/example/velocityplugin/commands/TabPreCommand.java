@@ -11,6 +11,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class TabPreCommand implements SimpleCommand {
@@ -56,16 +57,20 @@ public class TabPreCommand implements SimpleCommand {
                 String playerName = args[1];
                 server.getPlayer(playerName).ifPresentOrElse(
                     player -> {
-                        // 获取玩家的 TabList 信息
-                        TabListEntry entry = player.getTabList().getEntry(player.getUniqueId())
-                            .orElse(null);
-                        if (entry != null) {
+                        // 使用 getEntries() 获取所有条目
+                        Optional<TabListEntry> entry = player.getTabList().getEntries().stream()
+                            .filter(e -> e.getProfile().getId().equals(player.getUniqueId()))
+                            .findFirst();
+                        
+                        if (entry.isPresent()) {
+                            TabListEntry tabEntry = entry.get();
                             sendMessage(source, "&6=== TabList Debug 信息 ===");
                             sendMessage(source, "&e玩家名: &f" + player.getUsername());
-                            sendMessage(source, "&e显示名称: &f" + entry.getDisplayName().toString());
-                            sendMessage(source, "&e游戏模式: &f" + entry.getGameMode());
-                            sendMessage(source, "&e延迟: &f" + entry.getLatency());
-                            sendMessage(source, "&e UUID: &f" + entry.getProfile().getId());
+                            // 使用 Component 的 toString()
+                            sendMessage(source, "&e显示名称: &f" + tabEntry.getDisplayNameComponent().toString());
+                            sendMessage(source, "&e游戏模式: &f" + tabEntry.getGameMode());
+                            sendMessage(source, "&e延迟: &f" + tabEntry.getLatency());
+                            sendMessage(source, "&e UUID: &f" + tabEntry.getProfile().getId());
                         } else {
                             sendMessage(source, "&c无法获取玩家的 TabList 信息");
                         }
