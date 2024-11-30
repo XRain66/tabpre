@@ -120,11 +120,11 @@ fun isNonStable(version: String): Boolean {
 sourceSets {
     main {
         java {
-            // 使用标准的源代码目录配置
-            srcDirs("src/main/java")
+            // 使用完整的源代码路径配置
+            srcDirs(projectDir.resolve("src/main/java"))
         }
         resources {
-            srcDirs("src/main/resources")
+            srcDirs(projectDir.resolve("src/main/resources"))
         }
     }
 }
