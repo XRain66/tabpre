@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 base {
@@ -32,6 +32,8 @@ java {
 tasks {
     compileJava {
         options.encoding = "UTF-8"
+        options.isIncremental = true
+        options.isFork = true
     }
     
     processResources {
@@ -52,9 +54,22 @@ tasks {
             include(dependency("org.yaml:snakeyaml:2.2"))
         }
         mergeServiceFiles()
+        minimize()
     }
     
     build {
         dependsOn(shadowJar)
     }
-} 
+    
+    withType<JavaCompile>().configureEach {
+        options.encoding = "UTF-8"
+    }
+}
+
+// 优化构建性能
+gradle.projectsEvaluated {
+    tasks.withType<JavaCompile> {
+        options.compilerArgs.add("-Xmx1g")
+        options.compilerArgs.add("-Xms512m")
+    }
+}
