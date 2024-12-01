@@ -9,6 +9,7 @@ import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.player.TabListEntry;
+import com.velocitypowered.api.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import java.util.HashSet;
@@ -17,7 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
+import java.util.Optional;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.google.common.io.ByteStreams;
@@ -29,7 +30,7 @@ public class TabListListener {
     private final ProxyServer server;
     private final TabPrePlugin plugin;
     private final Logger logger;
-    private ScheduledFuture<?> updateTask;
+    private ScheduledTask updateTask;
     private static final MinecraftChannelIdentifier GAMEMODE_CHANNEL = 
         MinecraftChannelIdentifier.create("tabpre", "gamemode");
 
@@ -79,7 +80,7 @@ public class TabListListener {
     
     public void shutdown() {
         if (updateTask != null) {
-            updateTask.cancel(false);
+            updateTask.cancel();
         }
         server.getChannelRegistrar().unregister(GAMEMODE_CHANNEL);
     }
@@ -110,6 +111,12 @@ public class TabListListener {
             });
         });
         return gameModes;
+    }
+
+    private Optional<TabListEntry> findPlayerTabListEntry(Player player) {
+        return player.getTabList().getEntries().stream()
+            .filter(entry -> entry.getProfile().getId().equals(player.getUniqueId()))
+            .findFirst();
     }
 
     private void updateAllPlayers(Map<UUID, Integer> gameModes) {

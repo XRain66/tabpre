@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -69,59 +70,79 @@ public class TabPreConfig {
             return;
         }
         
-        // 更新前缀到配置
-        CommentedConfigurationNode prefixesNode = config.node("prefixes");
-        prefixesNode.raw(new HashMap<>(playerPrefixes));
-        
-        // 保存配置
-        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-            .path(configPath)
-            .build();
+        try {
+            // 更新前缀到配置
+            CommentedConfigurationNode prefixesNode = config.node("prefixes");
+            prefixesNode.set(new HashMap<>(playerPrefixes));
             
-        loader.save(config);
-        logger.info("配置保存成功！");
+            // 保存配置
+            YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .path(configPath)
+                .build();
+                
+            loader.save(config);
+            logger.info("配置保存成功！");
+        } catch (SerializationException e) {
+            throw new IOException("保存配置时发生错误", e);
+        }
     }
 
     private void validateConfig() throws IOException {
-        // 检查配置版本
-        int version = config.node("version").getInt(0);
-        if (version < CURRENT_VERSION) {
-            logger.warn("配置文件版本过低！正在尝试升级...");
-            upgradeConfig(version);
+        try {
+            // 检查配置版本
+            int version = config.node("version").getInt(0);
+            if (version < CURRENT_VERSION) {
+                logger.warn("配置文件版本过低！正在尝试升级...");
+                upgradeConfig(version);
+            }
+            
+            // 确保必要的节点存在
+            ensureNode("messages");
+            ensureNode("prefixes");
+            
+            // 保存可能的更改
+            save();
+        } catch (SerializationException e) {
+            throw new IOException("验证配置时发生错误", e);
         }
-        
-        // 确保必要的节点存在
-        ensureNode("messages");
-        ensureNode("prefixes");
-        
-        // 保存可能的更改
-        save();
     }
     
-    private void upgradeConfig(int oldVersion) {
-        // 在这里添加配置升级逻辑
-        config.node("version").set(CURRENT_VERSION);
-        logger.info("配置已升级到版本 {}", CURRENT_VERSION);
+    private void upgradeConfig(int oldVersion) throws IOException {
+        try {
+            // 在这里添加配置升级逻辑
+            config.node("version").set(CURRENT_VERSION);
+            logger.info("配置已升级到版本 {}", CURRENT_VERSION);
+        } catch (SerializationException e) {
+            throw new IOException("配置升级失败", e);
+        }
     }
     
-    private void ensureNode(String path) {
+    private void ensureNode(String path) throws IOException {
         if (config.node(path).empty()) {
-            config.node(path).set(new HashMap<>());
-            logger.warn("创建缺失的配置节点: {}", path);
+            try {
+                config.node(path).set(new HashMap<>());
+                logger.warn("创建缺失的配置节点: {}", path);
+            } catch (SerializationException e) {
+                throw new IOException("创建配置节点失败: " + path, e);
+            }
         }
     }
 
-    private void loadPrefixes() {
-        playerPrefixes.clear();
-        CommentedConfigurationNode prefixesNode = config.node("prefixes");
-        prefixesNode.childrenMap().forEach((key, value) -> {
-            String playerName = String.valueOf(key).toLowerCase();
-            String prefix = String.valueOf(value.raw());
-            if (prefix != null && !prefix.isEmpty()) {
-                playerPrefixes.put(playerName, prefix);
-                logger.debug("加载前缀: {} -> {}", playerName, prefix);
-            }
-        });
+    private void loadPrefixes() throws IOException {
+        try {
+            playerPrefixes.clear();
+            CommentedConfigurationNode prefixesNode = config.node("prefixes");
+            prefixesNode.childrenMap().forEach((key, value) -> {
+                String playerName = String.valueOf(key).toLowerCase();
+                String prefix = String.valueOf(value.raw());
+                if (prefix != null && !prefix.isEmpty()) {
+                    playerPrefixes.put(playerName, prefix);
+                    logger.debug("加载前缀: {} -> {}", playerName, prefix);
+                }
+            });
+        } catch (Exception e) {
+            throw new IOException("加载前缀时发生错误", e);
+        }
     }
 
     public String getPrefix(String playerName) {
@@ -137,11 +158,16 @@ public class TabPreConfig {
     }
 
     public String getMessage(String key) {
-        String message = config.node("messages", key).getString("");
-        if (message.isEmpty()) {
-            logger.warn("未找到消息键: {}", key);
+        try {
+            String message = config.node("messages", key).getString("");
+            if (message.isEmpty()) {
+                logger.warn("未找到消息键: {}", key);
+            }
+            return message;
+        } catch (Exception e) {
+            logger.error("获取消息时发生错误: {}", key, e);
+            return "";
         }
-        return message;
     }
 
     public boolean hasPrefix(String playerName) {
