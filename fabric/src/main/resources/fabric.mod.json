@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "tabpre-fabric",
+  "id": "tabpre",
   "version": "${version}",
   "name": "TabPre Fabric",
   "description": "TabPre 的 Fabric 端支持",

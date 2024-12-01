@@ -1,52 +1,23 @@
-buildscript {
-    repositories {
-        maven {
-            name = "Fabric"
-            url = uri("https://maven.fabricmc.net/")
-        }
-        gradlePluginPortal()
-        mavenCentral()
-    }
-    dependencies {
-        classpath("net.fabricmc:fabric-loom:0.8-SNAPSHOT")
-    }
-}
-
 plugins {
-    id("java")
-    id("checkstyle")
+    id("fabric-loom") version "1.1-SNAPSHOT" apply false
+    id("com.github.johnrengelman.shadow") version "7.1.2" apply false
 }
 
 allprojects {
-    apply(plugin = "java")
-    
-    group = "com.example"
-    version = "1.0-SNAPSHOT"
+    version = "1.0.0"
     
     repositories {
         mavenCentral()
-        maven {
-            name = "papermc"
-            url = uri("https://repo.papermc.io/repository/maven-public/")
-        }
-        maven {
-            name = "spongepowered"
-            url = uri("https://repo.spongepowered.org/repository/maven-public/")
-        }
-        maven {
-            name = "Fabric"
-            url = uri("https://maven.fabricmc.net/")
-        }
+        maven("https://repo.papermc.io/repository/maven-public/")
+        maven("https://maven.fabricmc.net/")
     }
+}
 
-    tasks.withType<JavaCompile>().configureEach {
+subprojects {
+    apply(plugin = "java")
+    
+    tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
-        options.compilerArgs.add("-sourcepath")
-        options.compilerArgs.add(sourceSets.main.get().java.srcDirs.joinToString(File.pathSeparator))
-    }
-
-    java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        options.release.set(17)
     }
 } 

@@ -1,5 +1,6 @@
 plugins {
     id("fabric-loom")
+    id("java")
 }
 
 base {
@@ -7,6 +8,7 @@ base {
 }
 
 group = "com.example.tabprefabric"
+version = rootProject.version
 
 dependencies {
     minecraft("com.mojang:minecraft:1.17.1")
@@ -18,26 +20,26 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
 }
 
 sourceSets {
     main {
         java {
-            srcDir("src/main/java")
+            srcDirs(file("src/main/java"))
         }
         resources {
-            srcDir("src/main/resources")
+            srcDirs(file("src/main/resources"))
         }
     }
 }
 
-loom {
-    runs {
-        named("client") {
-            property("mixin.debug", "true")
-            property("mixin.debug.export", "true")
-            property("mixin.refmap", "tabpre.refmap.json")
-        }
+idea {
+    module {
+        isDownloadSources = true
+        inheritOutputDirs = true
+        sourceDirs.add(file("src/main/java"))
+        resourceDirs.add(file("src/main/resources"))
     }
 }
 
@@ -57,10 +59,7 @@ tasks {
     
     compileJava {
         options.encoding = "UTF-8"
-        source(sourceSets.main.get().java)
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
-}
-
-java {
-    withSourcesJar()
 } 
