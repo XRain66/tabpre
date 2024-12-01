@@ -16,20 +16,17 @@ println("Loader version: " + project.property("loader_version"))
 
 repositories {
     maven {
-        name = "FabricMC"
+        name = "Fabric"
         url = uri("https://maven.fabricmc.net/")
-        content {
-            includeGroup("net.fabricmc")
-            includeGroup("net.fabricmc.fabric-api")
-        }
     }
-    
+    maven {
+        name = "Legacy Fabric"
+        url = uri("https://maven.legacyfabric.net/")
+    }
     maven {
         name = "Mojang"
         url = uri("https://libraries.minecraft.net/")
     }
-    
-    mavenLocal()
     mavenCentral()
 }
 
@@ -37,7 +34,11 @@ dependencies {
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+    
+    // Fabric API
+    modImplementation(fabricApi.module("fabric-api-base", project.property("fabric_version").toString()))
+    modImplementation(fabricApi.module("fabric-networking-api-v1", project.property("fabric_version").toString()))
+    modImplementation(fabricApi.module("fabric-lifecycle-events-v1", project.property("fabric_version").toString()))
 }
 
 java {
