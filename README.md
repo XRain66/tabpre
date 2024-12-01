@@ -22,7 +22,7 @@
 
 - Velocity 3.1.1+
 - Fabric 服务端 (Minecraft 1.17.1)
-- Java 16 或更高版本
+- Java 17 或更高版本
 
 ## 配置文件
 
