@@ -40,17 +40,17 @@ tasks {
     jar {
         from("LICENSE")
     }
-
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                from(components["java"])
-            }
-        }
-    }
     
     compileJava {
         options.encoding = "UTF-8"
         options.release.set(17)
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
     }
 } 
