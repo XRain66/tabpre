@@ -53,6 +53,7 @@ tasks {
     }
     
     jar {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         from("LICENSE") {
             rename { "${it}_${base.archivesName.get()}" }
         }
@@ -63,8 +64,6 @@ tasks {
         sourceCompatibility = "17"
         targetCompatibility = "17"
         
-        source = fileTree("src/main/java") {
-            include("**/*.java")
-        }
+        source(sourceSets.main.get().allJava)
     }
 } 
