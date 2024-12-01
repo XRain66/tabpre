@@ -19,6 +19,7 @@ dependencies {
     implementation("org.spongepowered:configurate-core:4.1.2")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
     implementation("org.yaml:snakeyaml:2.2")
+    implementation("io.leangen.geantyref:geantyref:1.3.13")
     
     compileOnly("com.google.inject:guice:5.1.0")
     compileOnly("org.slf4j:slf4j-api:1.7.32")
@@ -53,6 +54,7 @@ tasks {
             include(dependency("org.spongepowered:configurate-core:4.1.2"))
             include(dependency("org.spongepowered:configurate-yaml:4.1.2"))
             include(dependency("org.yaml:snakeyaml:2.2"))
+            include(dependency("io.leangen.geantyref:geantyref:1.3.13"))
         }
         mergeServiceFiles()
         minimize()
