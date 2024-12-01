@@ -1,51 +1,31 @@
 plugins {
     id("fabric-loom")
-    id("java")
+    id("maven-publish")
 }
 
 base {
-    archivesName.set("tabpre-fabric")
+    archivesName.set(project.property("archives_base_name").toString())
 }
 
-group = "com.example.tabprefabric"
-version = rootProject.version
+version = project.property("mod_version").toString()
+group = project.property("maven_group").toString()
+
+repositories {
+    maven("https://maven.fabricmc.net/")
+    mavenCentral()
+}
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.17.1")
-    mappings("net.fabricmc:yarn:1.17.1+build.65:v2")
-    modImplementation("net.fabricmc:fabric-loader:0.11.3")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:0.37.0+1.17")
+    minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
+    mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
+    modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
     withSourcesJar()
-}
-
-sourceSets {
-    main {
-        java {
-            setSrcDirs(listOf("src/main/java"))
-        }
-        resources {
-            setSrcDirs(listOf("src/main/resources"))
-        }
-    }
-}
-
-loom {
-    runs {
-        named("client") {
-            property("mixin.debug", "true")
-            property("mixin.debug.export", "true")
-            property("mixin.refmap", "tabpre.refmap.json")
-        }
-    }
-    
-    mixin {
-        defaultRefmapName.set("tabpre.refmap.json")
-    }
 }
 
 tasks {
@@ -55,21 +35,21 @@ tasks {
             expand(mutableMapOf("version" to project.version))
         }
     }
-    
+
     jar {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        from("LICENSE") {
-            rename { "${it}_${base.archivesName.get()}" }
+        from("LICENSE")
+    }
+
+    publishing {
+        publications {
+            create<MavenPublication>("mavenJava") {
+                from(components["java"])
+            }
         }
     }
     
     compileJava {
         options.encoding = "UTF-8"
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
-        
-        source(sourceSets.main.get().java)
-        
-        options.forkOptions.jvmArgs = listOf("-Xmx2G")
+        options.release.set(16)
     }
 } 
