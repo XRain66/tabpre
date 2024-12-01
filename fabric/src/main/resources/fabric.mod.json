@@ -3,9 +3,23 @@
   "id": "tabpre",
   "version": "${version}",
   "name": "TabPre Fabric",
+  "description": "TabPre 的 Fabric 端支持",
+  "authors": ["XRain666"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "server",
   "entrypoints": {
     "main": [
       "com.example.tabprefabric.TabPreFabric"
     ]
+  },
+  "mixins": [
+    "tabpre.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.17.1",
+    "java": ">=16"
   }
 } 

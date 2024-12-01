@@ -27,6 +27,7 @@ sourceSets {
     main {
         java {
             setSrcDirs(listOf("src/main/java"))
+            include("com/example/tabprefabric/**/*.java")
         }
         resources {
             setSrcDirs(listOf("src/main/resources"))
@@ -41,6 +42,10 @@ loom {
             property("mixin.debug.export", "true")
             property("mixin.refmap", "tabpre.refmap.json")
         }
+    }
+    
+    mixin {
+        defaultRefmapName.set("tabpre.refmap.json")
     }
 }
 
@@ -64,6 +69,10 @@ tasks {
         sourceCompatibility = "17"
         targetCompatibility = "17"
         
-        source(sourceSets.main.get().allJava)
+        source(fileTree("src/main/java") {
+            include("com/example/tabprefabric/**/*.java")
+        })
+        
+        options.forkOptions.jvmArgs = listOf("-Xmx2G")
     }
 } 
