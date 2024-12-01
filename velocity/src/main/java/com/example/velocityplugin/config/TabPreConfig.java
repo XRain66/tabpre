@@ -12,18 +12,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TabPreConfig {
     private final Path dataDirectory;
     private final Logger logger;
     private CommentedConfigurationNode config;
-    private final Map<String, String> playerPrefixes = new HashMap<>();
+    private final Map<String, String> playerPrefixes = new ConcurrentHashMap<>();
     private static final int CURRENT_VERSION = 1;
+    private final Path configPath;
 
     @Inject
     public TabPreConfig(@DataDirectory Path dataDirectory, Logger logger) {
         this.dataDirectory = dataDirectory;
         this.logger = logger;
+        this.configPath = dataDirectory.resolve("config.yml");
     }
 
     public void load() throws IOException {
@@ -31,8 +34,6 @@ public class TabPreConfig {
         if (!Files.exists(dataDirectory)) {
             Files.createDirectories(dataDirectory);
         }
-
-        Path configPath = dataDirectory.resolve("config.yml");
         
         // 如果配置文件不存在，从资源中复制
         if (!Files.exists(configPath)) {
@@ -41,7 +42,7 @@ public class TabPreConfig {
                     Files.copy(in, configPath);
                 } else {
                     logger.error("无法找到默认配置文件！");
-                    return;
+                    throw new IOException("默认配置文件不存在");
                 }
             }
         }
@@ -53,33 +54,101 @@ public class TabPreConfig {
             
         config = loader.load();
 
-        // 检查配置版本
-        int version = config.node("version").getInt(0);
-        if (version < CURRENT_VERSION) {
-            logger.warn("配置文件版本过低！请备份当前配置文件并删除，让插件生成新的配置文件。");
-        }
+        // 验证配置
+        validateConfig();
 
         // 加载前缀
         loadPrefixes();
+        
+        logger.info("配置加载成功！");
+    }
+    
+    public void save() throws IOException {
+        if (config == null) {
+            logger.error("无法保存配置：配置未加载");
+            return;
+        }
+        
+        // 更新前缀到配置
+        CommentedConfigurationNode prefixesNode = config.node("prefixes");
+        prefixesNode.raw(new HashMap<>(playerPrefixes));
+        
+        // 保存配置
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+            .path(configPath)
+            .build();
+            
+        loader.save(config);
+        logger.info("配置保存成功！");
+    }
+
+    private void validateConfig() throws IOException {
+        // 检查配置版本
+        int version = config.node("version").getInt(0);
+        if (version < CURRENT_VERSION) {
+            logger.warn("配置文件版本过低！正在尝试升级...");
+            upgradeConfig(version);
+        }
+        
+        // 确保必要的节点存在
+        ensureNode("messages");
+        ensureNode("prefixes");
+        
+        // 保存可能的更改
+        save();
+    }
+    
+    private void upgradeConfig(int oldVersion) {
+        // 在这里添加配置升级逻辑
+        config.node("version").set(CURRENT_VERSION);
+        logger.info("配置已升级到版本 {}", CURRENT_VERSION);
+    }
+    
+    private void ensureNode(String path) {
+        if (config.node(path).empty()) {
+            config.node(path).set(new HashMap<>());
+            logger.warn("创建缺失的配置节点: {}", path);
+        }
     }
 
     private void loadPrefixes() {
         playerPrefixes.clear();
         CommentedConfigurationNode prefixesNode = config.node("prefixes");
-        prefixesNode.childrenMap().forEach((key, value) -> 
-            playerPrefixes.put(String.valueOf(key).toLowerCase(), 
-                             String.valueOf(value.raw())));
+        prefixesNode.childrenMap().forEach((key, value) -> {
+            String playerName = String.valueOf(key).toLowerCase();
+            String prefix = String.valueOf(value.raw());
+            if (prefix != null && !prefix.isEmpty()) {
+                playerPrefixes.put(playerName, prefix);
+                logger.debug("加载前缀: {} -> {}", playerName, prefix);
+            }
+        });
     }
 
     public String getPrefix(String playerName) {
         return playerPrefixes.get(playerName.toLowerCase());
     }
 
+    public void setPrefix(String playerName, String prefix) {
+        if (prefix == null || prefix.isEmpty()) {
+            playerPrefixes.remove(playerName.toLowerCase());
+        } else {
+            playerPrefixes.put(playerName.toLowerCase(), prefix);
+        }
+    }
+
     public String getMessage(String key) {
-        return config.node("messages", key).getString("");
+        String message = config.node("messages", key).getString("");
+        if (message.isEmpty()) {
+            logger.warn("未找到消息键: {}", key);
+        }
+        return message;
     }
 
     public boolean hasPrefix(String playerName) {
         return playerPrefixes.containsKey(playerName.toLowerCase());
+    }
+    
+    public Map<String, String> getAllPrefixes() {
+        return new HashMap<>(playerPrefixes);
     }
 } 

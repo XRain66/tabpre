@@ -1,75 +1,76 @@
-# TabPre - Velocity Tab列表前缀插件
+# TabPre
 
-[![Build Status](https://github.com/XRain66/tabpre/workflows/Build/badge.svg)](https://github.com/XRain66/tabpre/actions)
-
-一个用于自定义玩家Tab列表前缀的Velocity插件。
+一个用于自定义玩家 Tab 列表前缀的 Velocity 插件，支持与 Fabric 服务端联动。
 
 ## 功能特点
 
-- 为不同玩家设置自定义前缀
+- 自定义玩家 Tab 列表前缀
+- 实时同步玩家游戏模式
 - 支持颜色代码
-- 实时更新Tab列表
-- 简单的命令系统
-- 完整的权限控制
+- 权限系统支持
+- 配置文件热重载
 
-## 安装
+## 安装说明
 
 1. 下载最新版本的插件
-2. 将插件放入Velocity服务器的`plugins`文件夹
-3. 启动或重启服务器
+2. 将 `tabpre-velocity.jar` 放入 Velocity 的 `plugins` 文件夹
+3. 将 `tabpre-fabric.jar` 放入 Fabric 服务端的 `mods` 文件夹
+4. 启动服务器，插件会自动生成配置文件
 
-## 已知问题
-
-由于mojang是靠玩家列表中的gamemode来向客户端传递游戏模式信息，所以随着旁观模式的加入，会存在无法启用插件后客户端不知道游戏模式的切换，解决方案之一是在后端服务器上安装通讯mod告诉插件玩家的游戏模式
-
-## 配置
+## 配置文件
 
 配置文件位于 `plugins/tabpre/config.yml`：
 
 ```yaml
 # 玩家前缀配置
 prefixes:
-  玩家名: "&c[VIP]&r "  # 将显示为红色的[VIP]前缀
-  其他玩家: "&6[MVP]&r " # 将显示为金色的[MVP]前缀
+  玩家名: "&c[前缀] &f"
+
+# 消息配置
+messages:
+  reload-success: "&a配置重载成功！"
+  no-permission: "&c你没有权限执行此命令！"
+  # ...
 ```
 
 ## 命令
 
+- `/tabprefix reload` - 重新加载配置
+- `/tabprefix debug <玩家>` - 显示玩家的 TabList 信息
 - `/tabprefix help` - 显示帮助信息
-- `/tabprefix reload` - 重新加载配置（需要权限）
 
 ## 权限
 
-- `tabpre.reload` - 允许重新加载配置
+- `tabpre.reload` - 允许重载配置
+- `tabpre.debug` - 允许使用调试命令
 
-## 颜色代码
+## 注意事项
 
-支持以下颜色代码：
-- &0 黑色
-- &1 深蓝色
-- &2 深绿色
-- &3 湖蓝色
-- &4 深红色
-- &5 紫色
-- &6 金色
-- &7 灰色
-- &8 深灰色
-- &9 蓝色
-- &a 绿色
-- &b 天蓝色
-- &c 红色
-- &d 粉红色
-- &e 黄色
-- &f 白色
-- &r 重置格式
+1. 颜色代码使用 `&` 符号
+2. 前缀支持所有 Minecraft 颜色代码
+3. 配置文件修改后需要使用 reload 命令重新加载
 
-## 开发
+## 常见问题
 
-### 构建
-```bash
-./gradlew build
-```
+Q: 为什么前缀没有显示？
+A: 请检查：
+1. 配置文件格式是否正确
+2. 玩家名是否完全匹配
+3. 是否正确使用了颜色代码
 
-## 支持
+Q: 游戏模式不同步怎么办？
+A: 确保：
+1. Fabric 端已正确安装 mod
+2. 服务器与 Velocity 的通信正常
+3. 没有其他插件干扰
 
-如果你遇到任何问题，请在GitHub上创建一个issue。 
+## 技术支持
+
+如果遇到问题，请：
+1. 查看控制台日志
+2. 使用 debug 命令检查玩家状态
+3. 在 GitHub 上提交 issue
+
+## 开源协议
+
+MIT License 

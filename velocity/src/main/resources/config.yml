@@ -2,19 +2,19 @@
 # 配置文件版本，请勿修改
 version: 1
 
-# 玩家前缀配置
-# 格式: 玩家名: "前缀"
-# 支持颜色代码 (&)
-prefixes:
-  example_player: "&c[VIP]&r "
-  another_player: "&6[MVP]&r "
-
 # 消息配置
 messages:
-  reload-success: "&a配置已重新加载！"
+  reload-success: "&a配置重载成功！"
   no-permission: "&c你没有权限执行此命令！"
+  unknown-command: "&c未知命令！使用 /tabprefix help 查看帮助。"
   help-message: |
-    &6=== TabPre 帮助 ===
-    &f/tabprefix reload - 重新加载配置
-    &f/tabprefix debug <玩家名字> - 显示玩家的 TabList 信息
-    &f/tabprefix help - 显示此帮助信息 
+    &6=== TabPre 命令帮助 ===
+    &e/tabprefix reload &7- 重新加载配置
+    &e/tabprefix debug <玩家> &7- 显示玩家的 TabList 信息
+    &e/tabprefix help &7- 显示此帮助信息
+
+# 玩家前缀配置
+# 格式: 玩家名: 前缀
+# 支持颜色代码 (&)
+prefixes:
+  example: "&c[管理员] &f"

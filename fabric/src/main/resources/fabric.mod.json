@@ -5,8 +5,12 @@
   "name": "TabPre Fabric",
   "description": "TabPre 的 Fabric 端支持",
   "authors": ["XRain666"],
-  "contact": {},
+  "contact": {
+    "homepage": "https://github.com/XRain66/tabpre",
+    "issues": "https://github.com/XRain66/tabpre/issues"
+  },
   "license": "MIT",
+  "icon": "assets/tabpre/icon.png",
   "environment": "server",
   "entrypoints": {
     "main": [
@@ -17,9 +21,9 @@
     "tabpre.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.11.3",
+    "fabricloader": ">=0.14.21",
     "fabric": "*",
-    "minecraft": "1.17.1",
-    "java": ">=16"
+    "minecraft": ">=1.20",
+    "java": ">=17"
   }
 } 
