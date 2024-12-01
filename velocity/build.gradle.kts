@@ -34,6 +34,7 @@ tasks {
         options.encoding = "UTF-8"
         options.isIncremental = true
         options.isFork = true
+        options.forkOptions.jvmArgs = listOf("-Xmx1g", "-Xms512m")
     }
     
     processResources {
@@ -63,13 +64,5 @@ tasks {
     
     withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
-    }
-}
-
-// 优化构建性能
-gradle.projectsEvaluated {
-    tasks.withType<JavaCompile> {
-        options.compilerArgs.add("-Xmx1g")
-        options.compilerArgs.add("-Xms512m")
     }
 }
