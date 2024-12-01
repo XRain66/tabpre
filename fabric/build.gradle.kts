@@ -27,6 +27,7 @@ sourceSets {
     main {
         java {
             srcDir("src/main/java")
+            include("com/example/tabprefabric/**")
         }
         resources {
             srcDir("src/main/resources")
@@ -63,11 +64,8 @@ tasks {
         sourceCompatibility = "17"
         targetCompatibility = "17"
         
-        source(sourceSets.main.get().java)
-        
-        options.compilerArgs.addAll(listOf(
-            "-sourcepath", sourceSets.main.get().java.asPath,
-            "-proc:none"
-        ))
+        source(fileTree("src/main/java") {
+            include("com/example/tabprefabric/**")
+        })
     }
 } 
