@@ -15,7 +15,21 @@ println("Fabric API version: " + project.property("fabric_version"))
 println("Loader version: " + project.property("loader_version"))
 
 repositories {
-    maven("https://maven.fabricmc.net/")
+    maven {
+        name = "FabricMC"
+        url = uri("https://maven.fabricmc.net/")
+        content {
+            includeGroup("net.fabricmc")
+            includeGroup("net.fabricmc.fabric-api")
+        }
+    }
+    
+    maven {
+        name = "Mojang"
+        url = uri("https://libraries.minecraft.net/")
+    }
+    
+    mavenLocal()
     mavenCentral()
 }
 
