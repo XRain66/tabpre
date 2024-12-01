@@ -83,18 +83,22 @@ public class TabListListener {
         String playerName = player.getUsername();
         
         // 获取玩家的前缀
-        String prefix = config.getPrefixes().getOrDefault(playerName, "");
+        String prefix = config.getPrefix(playerName);
         
         // 创建显示名称，只使用前缀和玩家名
         String displayName = prefix + playerName;
 
         // 设置玩家的显示名称
-        player.setPlayerListName(LegacyComponentSerializer.legacyAmpersand()
+        player.setTabListName(LegacyComponentSerializer.legacyAmpersand()
             .deserialize(displayName));
     }
 
     public void shutdown() {
         spectatorPlayers.clear();
         server.getChannelRegistrar().unregister(GAMEMODE_CHANNEL);
+    }
+
+    public void refreshAllPlayers() {
+        server.getAllPlayers().forEach(this::updatePlayerDisplay);
     }
 } 

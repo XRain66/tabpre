@@ -1,33 +1,27 @@
 package com.example.velocityplugin.config;
 
-import com.google.inject.Inject;
-import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
-import org.spongepowered.configurate.serialize.SerializationException;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class TabPreConfig {
     private final Path dataDirectory;
     private final Logger logger;
-    private CommentedConfigurationNode config;
-    private final Map<String, String> playerPrefixes = new ConcurrentHashMap<>();
-    private static final int CURRENT_VERSION = 1;
-    private final Path configPath;
+    private Map<String, String> prefixes;
+    private Map<String, String> messages;
 
-    @Inject
-    public TabPreConfig(@DataDirectory Path dataDirectory, Logger logger) {
+    public TabPreConfig(Path dataDirectory, Logger logger) {
         this.dataDirectory = dataDirectory;
         this.logger = logger;
-        this.configPath = dataDirectory.resolve("config.yml");
+        this.prefixes = new HashMap<>();
+        this.messages = new HashMap<>();
     }
 
     public void load() throws IOException {
@@ -35,146 +29,117 @@ public class TabPreConfig {
         if (!Files.exists(dataDirectory)) {
             Files.createDirectories(dataDirectory);
         }
-        
-        // 如果配置文件不存在，从资源中复制
+
+        // 配置文件路径
+        Path configPath = dataDirectory.resolve("config.yml");
+
+        // 如果配置文件不存在，创建默认配置
         if (!Files.exists(configPath)) {
-            try (InputStream in = getClass().getResourceAsStream("/config.yml")) {
-                if (in != null) {
-                    Files.copy(in, configPath);
-                } else {
-                    logger.error("无法找到默认配置文件！");
-                    throw new IOException("默认配置文件不存在");
-                }
-            }
+            createDefaultConfig(configPath);
         }
 
         // 加载配置
         YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
             .path(configPath)
             .build();
-            
-        config = loader.load();
 
-        // 验证配置
-        validateConfig();
-
-        // 加载前缀
-        loadPrefixes();
+        CommentedConfigurationNode root = loader.load();
         
-        logger.info("配置加载成功！");
+        // 加载前缀配置
+        prefixes.clear();
+        CommentedConfigurationNode prefixesNode = root.node("prefixes");
+        if (!prefixesNode.virtual()) {
+            Map<Object, ? extends CommentedConfigurationNode> prefixMap = prefixesNode.childrenMap();
+            for (Map.Entry<Object, ? extends CommentedConfigurationNode> entry : prefixMap.entrySet()) {
+                String playerName = entry.getKey().toString();
+                String prefix = entry.getValue().getString("");
+                prefixes.put(playerName, prefix);
+            }
+        }
+
+        // 加载消息配置
+        messages.clear();
+        CommentedConfigurationNode messagesNode = root.node("messages");
+        if (!messagesNode.virtual()) {
+            Map<Object, ? extends CommentedConfigurationNode> messageMap = messagesNode.childrenMap();
+            for (Map.Entry<Object, ? extends CommentedConfigurationNode> entry : messageMap.entrySet()) {
+                String key = entry.getKey().toString();
+                String message = entry.getValue().getString("");
+                messages.put(key, message);
+            }
+        }
     }
-    
+
+    private void createDefaultConfig(Path configPath) throws IOException {
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+            .path(configPath)
+            .build();
+
+        CommentedConfigurationNode root = loader.createNode();
+        
+        // 设置版本
+        root.node("version").set(1);
+        
+        // 设置消息
+        root.node("messages", "reload-success").set("&a配置重载成功！");
+        root.node("messages", "no-permission").set("&c你没有权限执行此命令！");
+        root.node("messages", "unknown-command").set("&c未知命令！使用 /tabprefix help 查看帮助。");
+        root.node("messages", "help-message").set(
+            "&6=== TabPre 命令帮助 ===\n" +
+            "&e/tabprefix reload &7- 重新加载配置\n" +
+            "&e/tabprefix debug <玩家> &7- 显示玩家的 TabList 信息\n" +
+            "&e/tabprefix help &7- 显示此帮助信息"
+        );
+        
+        // 设置示例前缀
+        root.node("prefixes", "example").set("&c[管理员] &f");
+        
+        // 保存配置
+        loader.save(root);
+    }
+
     public void save() throws IOException {
-        if (config == null) {
-            logger.error("无法保存配置：配置未加载");
-            return;
+        Path configPath = dataDirectory.resolve("config.yml");
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+            .path(configPath)
+            .build();
+
+        CommentedConfigurationNode root = loader.createNode();
+        
+        // 保存前缀配置
+        for (Map.Entry<String, String> entry : prefixes.entrySet()) {
+            root.node("prefixes", entry.getKey()).set(entry.getValue());
+        }
+
+        // 保存消息配置
+        for (Map.Entry<String, String> entry : messages.entrySet()) {
+            root.node("messages", entry.getKey()).set(entry.getValue());
         }
         
-        try {
-            // 更新前缀到配置
-            CommentedConfigurationNode prefixesNode = config.node("prefixes");
-            prefixesNode.set(new HashMap<>(playerPrefixes));
-            
-            // 保存配置
-            YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                .path(configPath)
-                .build();
-                
-            loader.save(config);
-            logger.info("配置保存成功！");
-        } catch (SerializationException e) {
-            throw new IOException("保存配置时发生错误", e);
-        }
+        loader.save(root);
     }
 
-    private void validateConfig() throws IOException {
-        try {
-            // 检查配置版本
-            int version = config.node("version").getInt(0);
-            if (version < CURRENT_VERSION) {
-                logger.warn("配置文件版本过低！正在尝试升级...");
-                upgradeConfig(version);
-            }
-            
-            // 确保必要的节点存在
-            ensureNode("messages");
-            ensureNode("prefixes");
-            
-            // 保存可能的更改
-            save();
-        } catch (SerializationException e) {
-            throw new IOException("验证配置时发生错误", e);
-        }
-    }
-    
-    private void upgradeConfig(int oldVersion) throws IOException {
-        try {
-            // 在这里添加配置升级逻辑
-            config.node("version").set(CURRENT_VERSION);
-            logger.info("配置已升级到版本 {}", CURRENT_VERSION);
-        } catch (SerializationException e) {
-            throw new IOException("配置升级失败", e);
-        }
-    }
-    
-    private void ensureNode(String path) throws IOException {
-        if (config.node(path).empty()) {
-            try {
-                config.node(path).set(new HashMap<>());
-                logger.warn("创建缺失的配置节点: {}", path);
-            } catch (SerializationException e) {
-                throw new IOException("创建配置节点失败: " + path, e);
-            }
-        }
-    }
-
-    private void loadPrefixes() throws IOException {
-        try {
-            playerPrefixes.clear();
-            CommentedConfigurationNode prefixesNode = config.node("prefixes");
-            prefixesNode.childrenMap().forEach((key, value) -> {
-                String playerName = String.valueOf(key).toLowerCase();
-                String prefix = String.valueOf(value.raw());
-                if (prefix != null && !prefix.isEmpty()) {
-                    playerPrefixes.put(playerName, prefix);
-                    logger.debug("加载前缀: {} -> {}", playerName, prefix);
-                }
-            });
-        } catch (Exception e) {
-            throw new IOException("加载前缀时发生错误", e);
-        }
+    public Map<String, String> getPrefixes() {
+        return prefixes;
     }
 
     public String getPrefix(String playerName) {
-        return playerPrefixes.get(playerName.toLowerCase());
+        return prefixes.getOrDefault(playerName, "");
     }
 
     public void setPrefix(String playerName, String prefix) {
-        if (prefix == null || prefix.isEmpty()) {
-            playerPrefixes.remove(playerName.toLowerCase());
-        } else {
-            playerPrefixes.put(playerName.toLowerCase(), prefix);
-        }
+        prefixes.put(playerName, prefix);
+    }
+
+    public void removePrefix(String playerName) {
+        prefixes.remove(playerName);
     }
 
     public String getMessage(String key) {
-        try {
-            String message = config.node("messages", key).getString("");
-            if (message.isEmpty()) {
-                logger.warn("未找到消息键: {}", key);
-            }
-            return message;
-        } catch (Exception e) {
-            logger.error("获取消息时发生错误: {}", key, e);
-            return "";
-        }
+        return messages.getOrDefault(key, "&c未找到消息: " + key);
     }
 
-    public boolean hasPrefix(String playerName) {
-        return playerPrefixes.containsKey(playerName.toLowerCase());
-    }
-    
-    public Map<String, String> getAllPrefixes() {
-        return new HashMap<>(playerPrefixes);
+    public void setMessage(String key, String message) {
+        messages.put(key, message);
     }
 } 
