@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
-import com.velocitypowered.api.network.MinecraftChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.ByteArrayDataInput;

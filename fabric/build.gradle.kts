@@ -26,11 +26,10 @@ java {
 sourceSets {
     main {
         java {
-            srcDir("src/main/java")
-            include("com/example/tabprefabric/**")
+            setSrcDirs(listOf("src/main/java"))
         }
         resources {
-            srcDir("src/main/resources")
+            setSrcDirs(listOf("src/main/resources"))
         }
     }
 }
@@ -64,8 +63,8 @@ tasks {
         sourceCompatibility = "17"
         targetCompatibility = "17"
         
-        source(fileTree("src/main/java") {
-            include("com/example/tabprefabric/**")
-        })
+        source = fileTree("src/main/java") {
+            include("**/*.java")
+        }
     }
 } 
