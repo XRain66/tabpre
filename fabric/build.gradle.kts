@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom")
+    id("fabric-loom") version "1.2.7"
     id("maven-publish")
 }
 
@@ -12,6 +12,7 @@ group = project.property("maven_group").toString()
 
 repositories {
     maven("https://maven.fabricmc.net/")
+    maven("https://server.bbkr.space/artifactory/libs-release/")
     mavenCentral()
 }
 
@@ -23,8 +24,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
 }
 
@@ -50,6 +51,6 @@ tasks {
     
     compileJava {
         options.encoding = "UTF-8"
-        options.release.set(16)
+        options.release.set(17)
     }
 } 
