@@ -14,17 +14,13 @@ repositories {
     maven("https://maven.fabricmc.net/") {
         name = "FabricMC"
     }
-    maven("https://cursemaven.com") {
-        name = "CurseMaven"
+    maven("https://maven.fabricmc.io/") {
+        name = "FabricMaven"
     }
-    maven("https://jitpack.io") {
-        name = "JitPack"
-    }
-    maven("https://api.modrinth.com/maven") {
-        name = "Modrinth"
+    maven("https://libraries.minecraft.net/") {
+        name = "Mojang"
     }
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
@@ -32,6 +28,8 @@ dependencies {
     mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-networking-api-v1:${project.property("fabric_version")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-lifecycle-events-v1:${project.property("fabric_version")}")
 }
 
 java {
@@ -58,7 +56,6 @@ tasks {
     }
 }
 
-// 配置源代码目录
 sourceSets {
     main {
         java {
