@@ -38,14 +38,20 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
-    withSourcesJar()
 }
 
 tasks {
+    withType<AbstractCopyTask>().configureEach {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+    
+    withType<JavaCompile>().configureEach {
+        options.encoding = "UTF-8"
+        options.release.set(17)
+    }
+
     processResources {
         inputs.property("version", project.version)
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        
         filesMatching("fabric.mod.json") {
             expand(mutableMapOf("version" to project.version))
         }
@@ -53,27 +59,34 @@ tasks {
 
     jar {
         from("LICENSE")
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
-    
-    compileJava {
-        options.encoding = "UTF-8"
-        options.release.set(17)
+
+    named<Jar>("sourcesJar") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        archiveClassifier.set("sources")
+        from(sourceSets.main.get().allSource)
     }
 }
 
-tasks.register("printConfig") {
-    doLast {
-        println("=== Build Configuration ===")
-        println("Project version: $version")
-        println("Group: $group")
-        println("Archive name: ${base.archivesName.get()}")
-        println("Java version: ${java.targetCompatibility}")
-        println("=== Dependencies ===")
-        println("Minecraft: ${project.property("minecraft_version")}")
-        println("Fabric API: ${project.property("fabric_version")}")
-        println("Loader: ${project.property("loader_version")}")
-        println("Yarn mappings: ${project.property("yarn_mappings")}")
+// 配置源代码 JAR
+java {
+    withSourcesJar()
+}
+
+loom {
+    runs {
+        named("client") {
+            client()
+            configName = "Minecraft Client"
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        named("server") {
+            server()
+            configName = "Minecraft Server"
+            ideConfigGenerated(true)
+            runDir("run")
+        }
     }
 }
 
