@@ -142,4 +142,8 @@ public class TabPreConfig {
     public void setMessage(String key, String message) {
         messages.put(key, message);
     }
+
+    public boolean hasPrefix(String playerName) {
+        return prefixes.containsKey(playerName);
+    }
 } 

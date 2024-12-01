@@ -88,9 +88,9 @@ public class TabListListener {
         // 创建显示名称，只使用前缀和玩家名
         String displayName = prefix + playerName;
 
-        // 设置玩家的显示名称
-        player.setTabListName(LegacyComponentSerializer.legacyAmpersand()
-            .deserialize(displayName));
+        // 使用 LegacyComponentSerializer 处理颜色代码
+        Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(displayName);
+        player.setPlayerListName(component);
     }
 
     public void shutdown() {
