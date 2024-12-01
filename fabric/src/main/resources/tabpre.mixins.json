@@ -9,5 +9,6 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "refmap": "tabpre.refmap.json"
+  "refmap": "tabpre-refmap.json",
+  "verbose": true
 } 
