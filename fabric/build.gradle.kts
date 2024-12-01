@@ -11,9 +11,20 @@ version = project.property("mod_version").toString()
 group = project.property("maven_group").toString()
 
 repositories {
-    maven("https://maven.fabricmc.net/")
-    maven("https://server.bbkr.space/artifactory/libs-release/")
+    maven("https://maven.fabricmc.net/") {
+        name = "FabricMC"
+    }
+    maven("https://cursemaven.com") {
+        name = "CurseMaven"
+    }
+    maven("https://jitpack.io") {
+        name = "JitPack"
+    }
+    maven("https://api.modrinth.com/maven") {
+        name = "Modrinth"
+    }
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -44,6 +55,18 @@ tasks {
     compileJava {
         options.encoding = "UTF-8"
         options.release.set(17)
+    }
+}
+
+// 配置源代码目录
+sourceSets {
+    main {
+        java {
+            srcDirs("src/main/java")
+        }
+        resources {
+            srcDirs("src/main/resources")
+        }
     }
 }
 

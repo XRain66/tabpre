@@ -1,6 +1,8 @@
 pluginManagement {
     repositories {
-        maven("https://maven.fabricmc.net/")
+        maven("https://maven.fabricmc.net/") {
+            name = "FabricMC"
+        }
         maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://maven.fabricmc.net/") {
             name = "Fabric"
@@ -10,18 +12,38 @@ pluginManagement {
                 includeGroup("fabric-loom")
             }
         }
-        maven("https://server.bbkr.space/artifactory/libs-release/")
+        maven("https://cursemaven.com") {
+            name = "CurseMaven"
+        }
+        maven("https://jitpack.io") {
+            name = "JitPack"
+        }
+        maven("https://api.modrinth.com/maven") {
+            name = "Modrinth"
+        }
         gradlePluginPortal()
         mavenCentral()
+        mavenLocal()
     }
 }
 
 dependencyResolutionManagement {
     repositories {
-        maven("https://maven.fabricmc.net/")
+        maven("https://maven.fabricmc.net/") {
+            name = "FabricMC"
+        }
         maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://server.bbkr.space/artifactory/libs-release/")
+        maven("https://cursemaven.com") {
+            name = "CurseMaven"
+        }
+        maven("https://jitpack.io") {
+            name = "JitPack"
+        }
+        maven("https://api.modrinth.com/maven") {
+            name = "Modrinth"
+        }
         mavenCentral()
+        mavenLocal()
     }
 }
 
