@@ -26,11 +26,10 @@ java {
 sourceSets {
     main {
         java {
-            srcDirs("${projectDir}/src/main/java")
-            include("com/example/tabprefabric/**")
+            srcDir("src/main/java")
         }
         resources {
-            srcDirs("${projectDir}/src/main/resources")
+            srcDir("src/main/resources")
         }
     }
 }
@@ -64,21 +63,11 @@ tasks {
         sourceCompatibility = "17"
         targetCompatibility = "17"
         
-        source = sourceSets.main.get().java.sourceDirectories
+        source(sourceSets.main.get().java)
         
         options.compilerArgs.addAll(listOf(
             "-sourcepath", sourceSets.main.get().java.asPath,
             "-proc:none"
         ))
-    }
-}
-
-// 添加 idea 插件配置
-apply(plugin = "idea")
-
-idea {
-    module {
-        sourceDirs.add(file("src/main/java"))
-        generatedSourceDirs.add(file("src/main/java"))
     }
 } 
