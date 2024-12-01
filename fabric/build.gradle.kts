@@ -10,16 +10,12 @@ base {
 version = project.property("mod_version").toString()
 group = project.property("maven_group").toString()
 
+println("Minecraft version: " + project.property("minecraft_version"))
+println("Fabric API version: " + project.property("fabric_version"))
+println("Loader version: " + project.property("loader_version"))
+
 repositories {
-    maven("https://maven.fabricmc.net/") {
-        name = "FabricMC"
-    }
-    maven("https://maven.fabricmc.io/") {
-        name = "FabricMaven"
-    }
-    maven("https://libraries.minecraft.net/") {
-        name = "Mojang"
-    }
+    maven("https://maven.fabricmc.net/")
     mavenCentral()
 }
 
@@ -28,8 +24,6 @@ dependencies {
     mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-networking-api-v1:${project.property("fabric_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-lifecycle-events-v1:${project.property("fabric_version")}")
 }
 
 java {
@@ -53,6 +47,21 @@ tasks {
     compileJava {
         options.encoding = "UTF-8"
         options.release.set(17)
+    }
+}
+
+tasks.register("printConfig") {
+    doLast {
+        println("=== Build Configuration ===")
+        println("Project version: $version")
+        println("Group: $group")
+        println("Archive name: ${base.archivesName.get()}")
+        println("Java version: ${java.targetCompatibility}")
+        println("=== Dependencies ===")
+        println("Minecraft: ${project.property("minecraft_version")}")
+        println("Fabric API: ${project.property("fabric_version")}")
+        println("Loader: ${project.property("loader_version")}")
+        println("Yarn mappings: ${project.property("yarn_mappings")}")
     }
 }
 
