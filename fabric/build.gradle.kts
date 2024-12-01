@@ -20,10 +20,6 @@ repositories {
         url = uri("https://maven.fabricmc.net/")
     }
     maven {
-        name = "Legacy Fabric"
-        url = uri("https://maven.legacyfabric.net/")
-    }
-    maven {
         name = "Mojang"
         url = uri("https://libraries.minecraft.net/")
     }
@@ -36,9 +32,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     
     // Fabric API
-    modImplementation(fabricApi.module("fabric-api-base", project.property("fabric_version").toString()))
-    modImplementation(fabricApi.module("fabric-networking-api-v1", project.property("fabric_version").toString()))
-    modImplementation(fabricApi.module("fabric-lifecycle-events-v1", project.property("fabric_version").toString()))
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
 }
 
 java {
