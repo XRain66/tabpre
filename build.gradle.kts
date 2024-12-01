@@ -1,5 +1,15 @@
+buildscript {
+    repositories {
+        maven("https://maven.fabricmc.net/")
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("net.fabricmc:fabric-loom:1.3.+")
+    }
+}
+
 plugins {
-    id("fabric-loom") version "1.1-SNAPSHOT" apply false
     id("com.github.johnrengelman.shadow") version "7.1.2" apply false
 }
 

@@ -26,20 +26,21 @@ java {
 sourceSets {
     main {
         java {
-            srcDirs(file("src/main/java"))
+            srcDirs("${projectDir}/src/main/java")
         }
         resources {
-            srcDirs(file("src/main/resources"))
+            srcDirs("${projectDir}/src/main/resources")
         }
     }
 }
 
-idea {
-    module {
-        isDownloadSources = true
-        inheritOutputDirs = true
-        sourceDirs.add(file("src/main/java"))
-        resourceDirs.add(file("src/main/resources"))
+loom {
+    runs {
+        named("client") {
+            property("mixin.debug", "true")
+            property("mixin.debug.export", "true")
+            property("mixin.refmap", "tabpre.refmap.json")
+        }
     }
 }
 
@@ -61,5 +62,8 @@ tasks {
         options.encoding = "UTF-8"
         sourceCompatibility = "17"
         targetCompatibility = "17"
+        
+        options.compilerArgs.add("-sourcepath")
+        options.compilerArgs.add(sourceSets.main.get().java.asPath)
     }
 } 
