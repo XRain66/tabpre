@@ -4,12 +4,6 @@ plugins {
     id("fabric-loom") version "1.2.7" apply false
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-    }
-}
-
 subprojects {
     apply(plugin = "java")
     
@@ -19,11 +13,12 @@ subprojects {
     }
 }
 
-tasks.register("clean") {
-    delete(rootProject.buildDir)
+tasks.named("clean") {
+    doLast {
+        layout.buildDirectory.asFile.get().deleteRecursively()
+    }
 }
 
-tasks.register("build") {
-    dependsOn(":velocity:build")
-    dependsOn(":fabric:build")
+tasks.named("build") {
+    dependsOn(":velocity:build", ":fabric:build")
 } 

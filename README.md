@@ -1,6 +1,6 @@
 # TabPre
 
-一个用于自定义玩家 Tab 列表前缀的 Velocity 插件，支持与 Fabric 服务端联动。
+一个用于自定义玩家 Tab 列表前缀的 Velocity 插件，解决了 Minecraft 1.17+ 中游戏模式同步的问题。通过 Fabric mod 支持，实现了准确的游戏模式显示和前缀管理。
 
 ## 功能特点
 
@@ -9,6 +9,7 @@
 - 支持颜色代码
 - 权限系统支持
 - 配置文件热重载
+- 跨服务器游戏模式同步
 
 ## 安装说明
 
@@ -16,6 +17,12 @@
 2. 将 `tabpre-velocity.jar` 放入 Velocity 的 `plugins` 文件夹
 3. 将 `tabpre-fabric.jar` 放入 Fabric 服务端的 `mods` 文件夹
 4. 启动服务器，插件会自动生成配置文件
+
+## 系统要求
+
+- Velocity 3.1.1+
+- Fabric 服务端 (Minecraft 1.17.1)
+- Java 16 或更高版本
 
 ## 配置文件
 
@@ -49,6 +56,7 @@ messages:
 1. 颜色代码使用 `&` 符号
 2. 前缀支持所有 Minecraft 颜色代码
 3. 配置文件修改后需要使用 reload 命令重新加载
+4. 确保所有子服都安装了对应版本的 Fabric mod
 
 ## 常见问题
 
@@ -63,6 +71,7 @@ A: 确保：
 1. Fabric 端已正确安装 mod
 2. 服务器与 Velocity 的通信正常
 3. 没有其他插件干扰
+4. 使用了正确的 Minecraft 版本 (1.17.1)
 
 ## 技术支持
 
@@ -70,6 +79,22 @@ A: 确保：
 1. 查看控制台日志
 2. 使用 debug 命令检查玩家状态
 3. 在 GitHub 上提交 issue
+
+## 构建说明
+
+1. 克隆仓库：
+```bash
+git clone https://github.com/XRain66/tabpre.git
+```
+
+2. 构建项目：
+```bash
+./gradlew build
+```
+
+构建完成后，你可以在以下位置找到生成的文件：
+- Velocity 插件: `velocity/build/libs/tabpre-velocity-*.jar`
+- Fabric mod: `fabric/build/libs/tabpre-fabric-*.jar`
 
 ## 开源协议
 
