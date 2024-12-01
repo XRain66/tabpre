@@ -27,7 +27,6 @@ sourceSets {
     main {
         java {
             setSrcDirs(listOf("src/main/java"))
-            include("com/example/tabprefabric/**/*.java")
         }
         resources {
             setSrcDirs(listOf("src/main/resources"))
@@ -69,9 +68,7 @@ tasks {
         sourceCompatibility = "17"
         targetCompatibility = "17"
         
-        source(fileTree("src/main/java") {
-            include("com/example/tabprefabric/**/*.java")
-        })
+        source(sourceSets.main.get().java)
         
         options.forkOptions.jvmArgs = listOf("-Xmx2G")
     }

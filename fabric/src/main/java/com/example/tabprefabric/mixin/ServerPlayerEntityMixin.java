@@ -10,7 +10,7 @@ import com.example.tabprefabric.GameModeChangeCallback;
 
 @Mixin(ServerPlayerEntity.class)
 public class ServerPlayerEntityMixin {
-    @Inject(method = "setGameMode", at = @At("HEAD"))
+    @Inject(method = "changeGameMode", at = @At("HEAD"))
     private void onGameModeChange(GameMode gameMode, CallbackInfo ci) {
         ServerPlayerEntity player = (ServerPlayerEntity)(Object)this;
         GameModeChangeCallback.EVENT.invoker().onChange(player, gameMode);

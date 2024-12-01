@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 base {
@@ -41,5 +42,19 @@ tasks {
     
     jar {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+    
+    shadowJar {
+        archiveClassifier.set("")
+        dependencies {
+            include(dependency("org.spongepowered:configurate-core:4.1.2"))
+            include(dependency("org.spongepowered:configurate-yaml:4.1.2"))
+            include(dependency("org.yaml:snakeyaml:2.2"))
+        }
+        mergeServiceFiles()
+    }
+    
+    build {
+        dependsOn(shadowJar)
     }
 } 
