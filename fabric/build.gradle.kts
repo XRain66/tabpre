@@ -38,6 +38,7 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
 }
 
 tasks {
@@ -59,18 +60,8 @@ tasks {
 
     jar {
         from("LICENSE")
-    }
-
-    named<Jar>("sourcesJar") {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        archiveClassifier.set("sources")
-        from(sourceSets.main.get().allSource)
     }
-}
-
-// 配置源代码 JAR
-java {
-    withSourcesJar()
 }
 
 loom {
