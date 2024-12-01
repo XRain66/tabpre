@@ -44,6 +44,8 @@ java {
 tasks {
     processResources {
         inputs.property("version", project.version)
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        
         filesMatching("fabric.mod.json") {
             expand(mutableMapOf("version" to project.version))
         }
@@ -51,6 +53,7 @@ tasks {
 
     jar {
         from("LICENSE")
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
     
     compileJava {
